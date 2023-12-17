@@ -3,40 +3,8 @@ import requests
 api_key = '40e719ee-4329-472f-3e50-08dbfd522f69'
 headers = {'X-ClientId': api_key}
 page_size = 100
-voivodeships_poland = [
-    "DOLNOŚLĄSKIE",
-    "KUJAWSKO-POMORSKIE",
-    "LUBELSKIE",
-    "LUBUSKIE",
-    "ŁÓDZKIE",
-    "MAŁOPOLSKIE",
-    "MAZOWIECKIE",
-    "OPOLSKIE",
-    "PODKARPACKIE",
-    "PODLASKIE",
-    "POMORSKIE",
-    "ŚLĄSKIE",
-    "ŚWIĘTOKRZYSKIE",
-    "WARMIŃSKO-MAZURSKIE",
-    "WIELKOPOLSKIE",
-    "ZACHODNIOPOMORSKIE"
-]
-voivodeships_id = ['011200000000',
-            '012400000000',
-            '020800000000',
-            '023000000000',
-            '023200000000',
-            '030200000000',
-            '031600000000',
-            '040400000000',
-            '042200000000',
-            '042800000000',
-            '051000000000',
-            '052600000000',
-            '060600000000',
-            '061800000000',
-            '062000000000',
-            '071400000000']
+
+
 variables_dictionary = {
     'K12': {'G603': ['P3820']},
 
@@ -90,7 +58,25 @@ def get_locations():
         #print(response)
         areas.extend(response.json()['results'])
     areas_df = pd.DataFrame(areas)
-    areas_df[areas_df['name'].isin(voivodeships_poland)].to_excel('voivodeships_poland.xlsx')
+    voivodeships_poland_names = [
+        "DOLNOŚLĄSKIE",
+        "KUJAWSKO-POMORSKIE",
+        "LUBELSKIE",
+        "LUBUSKIE",
+        "ŁÓDZKIE",
+        "MAŁOPOLSKIE",
+        "MAZOWIECKIE",
+        "OPOLSKIE",
+        "PODKARPACKIE",
+        "PODLASKIE",
+        "POMORSKIE",
+        "ŚLĄSKIE",
+        "ŚWIĘTOKRZYSKIE",
+        "WARMIŃSKO-MAZURSKIE",
+        "WIELKOPOLSKIE",
+        "ZACHODNIOPOMORSKIE"
+    ]
+    areas_df[areas_df['name'].isin(voivodeships_poland_names)].to_excel('voivodeships_poland.xlsx')
     areas_df.to_excel('areas.xlsx')
 
 def get_available_data():
@@ -132,10 +118,10 @@ def get_available_data():
         with pd.ExcelWriter('variables.xlsx', engine='openpyxl', mode='a') as writer:
             variable_df.to_excel(writer, sheet_name=str(id), index=False)
 
-def get_dataset():
+def get_dataset(voivodeships_poland):
     """Function to fetch data from an API for specified years"""
     variable_values = []
-    for voivodeship in voivodeships_id:
+    for voivodeship in voivodeships_poland.values():
         row_data = {'Location': None, 'Year': None, 'Key': None}  # Initialize row_data for each location
 
         for var_id in variables:

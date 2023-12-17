@@ -1,14 +1,21 @@
 import tkinter as tk
 import comparison
 import etl
+import pandas as pd
 class Gui:
     functionalities = sorted(
         ['Create Visual', 'Create Ranking', 'Check Correlation', 'Compare Areas', 'Download Dataset'])
 
+    def __init__(self):
+        self.voivodeships_poland = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values)
+
     def button_click(self,option, window):
         match option:
             case 'Download Dataset':
-                etl.get_dataset().to_excel('gus.xlsx')
+                etl.get_dataset(self.voivodeships_poland).to_excel('gus.xlsx')
+            case 'Compare Areas':
+                window.destroy()
+                comparison.download_comparison()
             case _: print("else...")
         pass
     def start_program(self):
