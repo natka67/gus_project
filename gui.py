@@ -2,6 +2,9 @@ import tkinter as tk
 class Gui:
     functionalities = sorted(
         ['Create Visual', 'Create Ranking', 'Check Correlation', 'Compare Areas', 'Download Dataset'])
+
+    def button_click(self,option, window):
+        pass
     def start_program(self):
         window = tk.Tk()
         # Displaying window at the center of a screen
