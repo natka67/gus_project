@@ -1,9 +1,15 @@
 import tkinter as tk
+import comparison
+import etl
 class Gui:
     functionalities = sorted(
         ['Create Visual', 'Create Ranking', 'Check Correlation', 'Compare Areas', 'Download Dataset'])
 
     def button_click(self,option, window):
+        match option:
+            case 'Download Dataset':
+                etl.get_dataset().to_excel('gus.xlsx')
+            case _: print("else...")
         pass
     def start_program(self):
         window = tk.Tk()
