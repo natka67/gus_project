@@ -49,5 +49,5 @@ def download_comparison(voivodeships):
     df.iloc[:, 0] = pd.to_numeric(df.iloc[:, 0], errors='coerce')
     df.iloc[:, 1] = pd.to_numeric(df.iloc[:, 1], errors='coerce')
     df['Comparison'] = df.iloc[:, 0] - df.iloc[:, 1]
-    df.to_excel(f'comparison{'_'.join(df.columns)}.xlsx')
+    df.to_excel(f'comparison_{'_'.join(df.columns)}.xlsx')
 
