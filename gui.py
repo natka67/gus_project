@@ -7,7 +7,7 @@ class Gui:
         ['Create Visual', 'Create Ranking', 'Check Correlation', 'Compare Areas', 'Download Dataset'])
 
     def __init__(self):
-        self.voivodeships_poland = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values)
+        self.voivodeships_poland = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values).values()
 
     def button_click(self,option, window):
         match option:
@@ -15,7 +15,7 @@ class Gui:
                 etl.get_dataset(self.voivodeships_poland).to_excel('gus.xlsx')
             case 'Compare Areas':
                 window.destroy()
-                comparison.download_comparison()
+                comparison.start_functionality()
             case _: print("else...")
         pass
     def start_program(self):

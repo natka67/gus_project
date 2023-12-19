@@ -121,14 +121,14 @@ def get_available_data():
 def get_dataset(voivodeships_poland):
     """Function to fetch data from an API for specified years"""
     variable_values = []
-    for voivodeship in voivodeships_poland.values():
+    for voivodeship in voivodeships_poland:
         row_data = {'Location': None, 'Year': None, 'Key': None}  # Initialize row_data for each location
 
         for var_id in variables:
             url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&var-id={var_id}&year=2020'
 
             try:
-                response = requests.get(url_data_base, headers=headers) #requests.get(url_data_base)
+                response = requests.get(url_data_base)#requests.get(url_data_base, headers=headers) #
                 response.raise_for_status()  # Check for errors in the response
 
                 if response.status_code != 200 or response.json()['totalRecords'] == 0:
