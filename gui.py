@@ -13,6 +13,7 @@ class Gui:
         match option:
             case 'Download Dataset':
                 etl.get_dataset(self.voivodeships_poland).to_excel('gus.xlsx')
+                self.create_success_window()
             case 'Compare Areas':
                 window.destroy()
                 comparison.start_functionality()
@@ -34,6 +35,13 @@ class Gui:
             button.pack(pady=5)
         window.mainloop()
 
+    def create_success_window(self):
+        root = tk.Tk()
+        root.geometry("200x100")
+        root.title("Success")
+        success_label = tk.Label(root, text="Download Succeeded")
+        success_label.pack(expand=True)
+        root.mainloop()
 
 if __name__ == "__main__":
     try:

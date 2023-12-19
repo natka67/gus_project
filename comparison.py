@@ -31,7 +31,6 @@ def start_functionality():
         download_comparison(voivodeships)
 
     def return_to_menu():
-        gui1 = Gui()
         root.destroy()
         Gui().start_program()
 
@@ -50,4 +49,5 @@ def download_comparison(voivodeships):
     df.iloc[:, 1] = pd.to_numeric(df.iloc[:, 1], errors='coerce')
     df['Comparison'] = df.iloc[:, 0] - df.iloc[:, 1]
     df.to_excel(f'comparison_{'_'.join(df.columns)}.xlsx')
+    Gui().create_success_window()
 
