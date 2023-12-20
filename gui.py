@@ -103,11 +103,9 @@ class Gui:
         def save_as_pdf():
             pass
 
-        ttk.Button(left_frame, text="Generate Plot", command=generate_plot).grid(row=3, column=0, columnspan=1, pady=10)
-
-        ttk.Button(left_frame, text="Navigation", command=return_to_menu).grid(row=3, column=1, columnspan=1, pady=10)
-
-        ttk.Button(left_frame, text="Download", command=save_as_pdf).grid(row=3, column=2, columnspan=1, pady=10)
+        ttk.Button(left_frame, text="Refresh Plot", command=generate_plot).grid(row=3, column=0, columnspan=1, pady=10)
+        ttk.Button(left_frame, text="Download Plot", command=save_as_pdf).grid(row=3, column=1, columnspan=1, pady=10)
+        ttk.Button(left_frame, text="Go back", command=return_to_menu).grid(row=3, column=2, columnspan=1, pady=10)
 
         # Right frame for the plot
         right_frame = ttk.Frame(root)
