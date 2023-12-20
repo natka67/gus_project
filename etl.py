@@ -111,13 +111,20 @@ def get_available_data():
     ids = [j for i in variables_dictionary.values() for k in i.values() for j in k]
     empty_df = pd.DataFrame()
     empty_df.to_excel('variables.xlsx', index=False)
+    var_list = []
     for id in ids:
         url_variable = f'https://bdl.stat.gov.pl/api/v1/variables?subject-id={id}&year=2020&format=json'
         variable = requests.get(url_variable).json()['results']
+        var_list.extend(variable)
         variable_df = pd.DataFrame(variable)
         with pd.ExcelWriter('variables.xlsx', engine='openpyxl', mode='a') as writer:
             variable_df.to_excel(writer, sheet_name=str(id), index=False)
+    var_df = pd.DataFrame(var_list)
+    merged = pd.merge(var_df, children, how='left', left_on='subjectId', right_on='id')
+    merged['id_x'] = merged['id_x'].astype(str)
+    merged.loc[merged['name'].str.contains('wskaźniki'), 'name'] = merged['n1']
 
+    merged[merged['id_x'].isin(variables)].to_excel('details_variabled.xlsx')
 def get_dataset(voivodeships_poland):
     """Function to fetch data from an API for specified years"""
     variable_values = []
@@ -152,5 +159,6 @@ def get_dataset(voivodeships_poland):
     result_df = pd.concat(variable_values, ignore_index=True)
     return result_df
 
-if __name__ == "__main__":
+
+if __name__=='__main__':
     get_available_data()

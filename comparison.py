@@ -5,6 +5,7 @@ from gui import *
 
 def start_functionality():
     root = Tk()
+    root.title('Comparison')
     height = 120
     width = 450
     root.geometry(f"{width}x{height}")
