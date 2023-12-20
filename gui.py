@@ -2,7 +2,7 @@ from tkinter import ttk
 from matplotlib.figure import Figure
 import tkinter as tk
 import visuals
-import time
+import tkinter.filedialog as tkFileDialog
 import pandas as pd
 import etl
 import comparison
@@ -12,6 +12,7 @@ class Gui:
         ['Utwórz wizualizację', 'Utwórz ranking', 'Sprawdź korelację', 'Porównaj obszary', 'Pobierz zestaw danych'])
 
     def __init__(self):
+        self.loaded_graph = False
         self.graph = None
         self.canvas = None
         self.ax=None
@@ -22,7 +23,7 @@ class Gui:
         match option:
             case 'Pobierz zestaw danych':
                 etl.get_dataset().to_excel('gus.xlsx')
-                self.create_success_window()
+                self.create_message_window()
             case 'Porównaj obszary':
                 window.destroy()
                 comparison.start_functionality()
@@ -32,7 +33,7 @@ class Gui:
             case _: print("inne...")
         pass
 
-    def create_success_window(self, message = 'Funkcjonalność zakończyła się z powodzeniem'):
+    def create_message_window(self, message ='Sukces'):
         """
         Funkcja wyświeta okienko powiadamiające użytkownika o sukcesie pobrania pliku.
         """
@@ -43,7 +44,7 @@ class Gui:
         center_x = int((root.winfo_screenwidth() - width) / 2)
         center_y = int((root.winfo_screenheight() - height) / 2)
         root.geometry(f"+{center_x}+{center_y}")
-        root.title("Sukces")
+        root.title("Powiadomienie")
         success_label = tk.Label(root, text=message)
         success_label.pack(expand=True)
         root.after(3000, root.destroy)
@@ -121,11 +122,17 @@ class Gui:
         right_frame.grid(row=0, column=1, sticky="nsew")
 
         # Pusty wykres wyświetlany na początku
-        self.graph = Figure(figsize=(5, 4), dpi=100,
-                            facecolor='none')  # Set facecolor to 'none' for transparent background
-        self.ax = self.graph.add_subplot(111, facecolor='none')  # Set facecolor to 'none' for transparent background
+        self.graph = Figure(figsize=(5, 4), dpi=100, facecolor='none')
+        self.ax = self.graph.add_subplot(111, facecolor='none')
         self.canvas = FigureCanvasTkAgg(self.graph, master=right_frame)
         self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+
+        def save_as_pdf():
+            """
+            Funkcja zapisuje wykres jako plik PDF.
+            """
+            file_path = f'{dropdown1.get()}_{dropdown2.get()}_{dropdown3.get()}.pdf'.replace(' ', '_')#tk.filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
+            self.graph.savefig(file_path, format='pdf')
 
         def generate_plot():
             """
@@ -134,20 +141,28 @@ class Gui:
             col_1 = dropdown2.get()
             chart_type = dropdown1.get()
 
-            if chart_type == 'Wykres punktowy':
+            if chart_type == '':
+                self.create_message_window('Uzupełnij typ wykresu')
+            elif col_1 == '':
+                self.create_message_window('Uzupełnij nazwę kolumny')
+            elif chart_type == 'Wykres punktowy':
                 col_2 = dropdown3.get()
+                if col_2 == '':
+                    self.create_message_window('Uzupełnij nazwę kolumny')
                 self.graph = visuals.create_scatter_plot(
                     name_1=col_1, name_2=col_2,
                     id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
                 )
             elif chart_type == 'Mapa':
-                self.graph = visuals.create_map(self.variables_details[col_1])
+                self.graph = visuals.create_map(
+                    name_1=col_1, id_1=self.variables_details[col_1]
+                )
 
             self.canvas.get_tk_widget().destroy()
             self.canvas = FigureCanvasTkAgg(self.graph, master=right_frame)
             self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
             self.canvas.draw()
-            self.canvas.get_tk_widget().after(500, self.create_success_window)
+            self.loaded_graph = True
 
         def return_to_menu():
             """
@@ -155,12 +170,6 @@ class Gui:
             """
             root.destroy()
             self.start_program()
-
-        def save_as_pdf():
-            """
-            Funkcja zapisuje wykres jako plik PDF.
-            """
-            pass
 
         # Przyciski
         ttk.Button(left_frame, text="Załaduj Wykres", command=generate_plot).grid(row=3, column=0, columnspan=1,                                                      pady=10)
