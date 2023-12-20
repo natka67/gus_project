@@ -4,7 +4,7 @@ api_key = '40e719ee-4329-472f-3e50-08dbfd522f69'
 headers = {'X-ClientId': api_key}
 page_size = 100
 
-
+voivodeships = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['name','id']].values).values()
 variables_dictionary = {
     'K12': {'G603': ['P3820']},
 
@@ -125,19 +125,16 @@ def get_available_data():
     merged.loc[merged['name'].str.contains('wskaźniki'), 'name'] = merged['n1']
 
     merged[merged['id_x'].isin(variables)].to_excel('details_variabled.xlsx')
-def get_dataset(voivodeships_poland):
+def get_dataset(voivodeships_poland = voivodeships, variables_list = variables):
     """Function to fetch data from an API for specified years"""
     variable_values = []
     for voivodeship in voivodeships_poland:
         row_data = {'Location': None, 'Year': None, 'Key': None}  # Initialize row_data for each location
 
-        for var_id in variables:
+        for var_id in variables_list:
             url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&var-id={var_id}&year=2020'
-
             try:
-                response = requests.get(url_data_base)#requests.get(url_data_base, headers=headers) #
-                response.raise_for_status()  # Check for errors in the response
-
+                response = requests.get(url_data_base, headers=headers) #requests.get(url_data_base)#
                 if response.status_code != 200 or response.json()['totalRecords'] == 0:
                     raise CustomAPIError(response.status_code)
 
@@ -159,6 +156,3 @@ def get_dataset(voivodeships_poland):
     result_df = pd.concat(variable_values, ignore_index=True)
     return result_df
 
-
-if __name__=='__main__':
-    get_available_data()

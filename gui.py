@@ -1,10 +1,9 @@
-import tkinter as tk
 from tkinter import ttk
 from matplotlib.figure import Figure
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import tkinter as tk
+import visuals
+import time
 import pandas as pd
-import matplotlib.pyplot as plt
 import etl
 import comparison
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
@@ -14,12 +13,15 @@ class Gui:
 
     def __init__(self):
         self.graph = None
+        self.canvas = None
+        self.ax=None
+        self.variables_details  = dict(zip(pd.read_excel('details_variabled.xlsx')['name'], pd.read_excel('details_variabled.xlsx', dtype={'id_x': str})['id_x']))
         self.voivodeships_poland = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values).values()
 
-    def button_click(self,option, window):
+    def functionality_choosen(self, option, window):
         match option:
             case 'Pobierz zestaw danych':
-                etl.get_dataset(self.voivodeships_poland).to_excel('gus.xlsx')
+                etl.get_dataset().to_excel('gus.xlsx')
                 self.create_success_window()
             case 'Porównaj obszary':
                 window.destroy()
@@ -29,6 +31,24 @@ class Gui:
                 self.create_window_for_visuals()
             case _: print("inne...")
         pass
+
+    def create_success_window(self, message = 'Funkcjonalność zakończyła się z powodzeniem'):
+        """
+        Funkcja wyświeta okienko powiadamiające użytkownika o sukcesie pobrania pliku.
+        """
+        root = tk.Tk()
+        height = 100
+        width = 450
+        root.geometry(f"{width}x{height}")
+        center_x = int((root.winfo_screenwidth() - width) / 2)
+        center_y = int((root.winfo_screenheight() - height) / 2)
+        root.geometry(f"+{center_x}+{center_y}")
+        root.title("Sukces")
+        success_label = tk.Label(root, text=message)
+        success_label.pack(expand=True)
+        root.after(3000, root.destroy)
+        root.mainloop()
+
     def start_program(self):
         window = tk.Tk()
         # Displaying window at the center of a screen
@@ -41,22 +61,21 @@ class Gui:
         window.title("Menu")
         # Adding buttons for every available function
         for function in self.functionalities:
-            button = tk.Button(window, text=function, command=lambda option=function: self.button_click(option, window))
+            button = tk.Button(window, text=function, command=lambda option=function: self.functionality_choosen(option, window))
             button.pack(pady=5)
         window.mainloop()
 
-    def create_success_window(self):
-        root = tk.Tk()
-        root.geometry("200x100")
-        root.title("Sukces")
-        success_label = tk.Label(root, text="Pobieranie udane")
-        success_label.pack(expand=True)
-        root.mainloop()
+
 
     def create_window_for_visuals(self):
+        """
+        Funkcja tworzy okno do generowania wykresów punktowych i map.
+        """
+        # Inicjalizacja głównego okna Tkinter
         root = tk.Tk()
         root.title('Wykresy')
-        #root.create_widgets()
+
+        # Ustawienia rozmiaru i położenia okna
         height = 1000
         width = 1720
         root.geometry(f"{width}x{height}")
@@ -64,23 +83,28 @@ class Gui:
         center_y = int((root.winfo_screenheight() - height) / 2)
         root.geometry(f"+{center_x}+{center_y}")
 
-        col_names = list(pd.read_excel('details_variabled.xlsx')['name'])
+        # Odczyt nazw kolumn dostępnych do użycia z pliku Excel
+        col_names = list(self.variables_details.keys())
 
         def update_ui(*args):
+            """
+            Funkcja do aktualizacji interfejsu użytkownika w zależności od wybranej wartości w dropdownie.
+            """
             selected_value = dropdown1.get()
             if selected_value == "Wykres punktowy":
                 dropdown3.grid()
             else:
                 dropdown3.grid_remove()
 
-        # Left frame for dropdowns and buttons
+        # Ramka po lewej stronie przeznaczona na liste opcji i przyciski
         left_frame = ttk.Frame(root, padding=10)
         left_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
 
-        # Dropdowns and Buttons
+        # Listy opcji
         ttk.Label(left_frame, text="Typ wykresu:").grid(row=0, column=0, pady=5, sticky=tk.W)
         dropdown1_var = tk.StringVar()
-        dropdown1 = ttk.Combobox(left_frame, values=['Mapa', 'Wykres punktowy'], state="readonly", textvariable=dropdown1_var, width=40)
+        dropdown1 = ttk.Combobox(left_frame, values=['Mapa', 'Wykres punktowy'], state="readonly",
+                                 textvariable=dropdown1_var, width=40)
         dropdown1.grid(row=0, column=1, pady=5, padx=(0, 10))
         dropdown1_var.trace_add("write", update_ui)
 
@@ -90,43 +114,70 @@ class Gui:
 
         dropdown3 = ttk.Combobox(left_frame, values=col_names, state="readonly", width=40)
         dropdown3.grid(row=2, column=1, pady=5, padx=(0, 10))
+        dropdown3.grid_remove()
+
+        # Ramka po prawej stronie przeznaczona na wykres
+        right_frame = ttk.Frame(root)
+        right_frame.grid(row=0, column=1, sticky="nsew")
+
+        # Pusty wykres wyświetlany na początku
+        self.graph = Figure(figsize=(5, 4), dpi=100,
+                            facecolor='none')  # Set facecolor to 'none' for transparent background
+        self.ax = self.graph.add_subplot(111, facecolor='none')  # Set facecolor to 'none' for transparent background
+        self.canvas = FigureCanvasTkAgg(self.graph, master=right_frame)
+        self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
 
         def generate_plot():
-            type_value = dropdown1.get()
-            column1_value = dropdown2.get()
-            column2_value = dropdown3.get()
+            """
+            Funkcja generuje wykres na podstawie wybranych opcji.
+            """
+            col_1 = dropdown2.get()
+            chart_type = dropdown1.get()
+
+            if chart_type == 'Wykres punktowy':
+                col_2 = dropdown3.get()
+                self.graph = visuals.create_scatter_plot(
+                    name_1=col_1, name_2=col_2,
+                    id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
+                )
+            elif chart_type == 'Mapa':
+                self.graph = visuals.create_map(self.variables_details[col_1])
+
+            self.canvas.get_tk_widget().destroy()
+            self.canvas = FigureCanvasTkAgg(self.graph, master=right_frame)
+            self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+            self.canvas.draw()
+            self.canvas.get_tk_widget().after(500, self.create_success_window)
 
         def return_to_menu():
+            """
+            Funkcja zamyka aktualne okno i powraca do głównego menu programu.
+            """
             root.destroy()
             self.start_program()
 
         def save_as_pdf():
+            """
+            Funkcja zapisuje wykres jako plik PDF.
+            """
             pass
 
-        ttk.Button(left_frame, text="Załaduj Wykres", command=generate_plot).grid(row=3, column=0, columnspan=1, pady=10)
+        # Przyciski
+        ttk.Button(left_frame, text="Załaduj Wykres", command=generate_plot).grid(row=3, column=0, columnspan=1,                                                      pady=10)
         ttk.Button(left_frame, text="Pobierz Wykres", command=save_as_pdf).grid(row=3, column=1, columnspan=1, pady=10)
         ttk.Button(left_frame, text="Powrót", command=return_to_menu).grid(row=3, column=2, columnspan=1, pady=10)
 
-        # Right frame for the plot
-        right_frame = ttk.Frame(root)
-        right_frame.grid(row=0, column=1, sticky="nsew")
-
-        # Matplotlib plot
-        figure = Figure(figsize=(5, 4), dpi=100)
-        self.ax = figure.add_subplot(111)
-        canvas = FigureCanvasTkAgg(figure, master=right_frame)
-        canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-
-        # Resize weight for frames
+        # Konfiguracja proporcji dla ramek w okienku
         root.grid_rowconfigure(0, weight=1)
         root.grid_columnconfigure(0, weight=2)
-        root.grid_columnconfigure(1, weight=8)
+        root.grid_columnconfigure(1, weight=9)
 
         root.mainloop()
+
 
 if __name__ == "__main__":
     try:
         gui = Gui()
-        gui.start_program()
+        gui.create_window_for_visuals() # start_program()
     except Exception as err:
         print(type(err), err)

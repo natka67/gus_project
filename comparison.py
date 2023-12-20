@@ -43,7 +43,7 @@ def start_functionality():
     root.mainloop()
 
 def download_comparison(voivodeships):
-    df = etl.get_dataset(voivodeships).T
+    df = etl.get_dataset(voivodeships_poland=voivodeships).T
     df.columns = df.iloc[0]
     df = df.iloc[3:]
     df.iloc[:, 0] = pd.to_numeric(df.iloc[:, 0], errors='coerce')
