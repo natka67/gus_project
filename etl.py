@@ -4,7 +4,7 @@ api_key = '40e719ee-4329-472f-3e50-08dbfd522f69'
 headers = {'X-ClientId': api_key}
 page_size = 100
 
-voivodeships = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['name','id']].values).values()
+voivodeships = dict(pd.read_excel(r'system_data\voivodeships_poland.xlsx', dtype={'id': str})[['name','id']].values).values()
 variables_dictionary = {
     'K12': {'G603': ['P3820']},
 
@@ -17,8 +17,7 @@ variables_dictionary = {
     'K11': {'G231': [],
             'G619': ['P3953']}
 }
-variables = ['747060','747061','747062','747063','747064','747065','747066','747067','747068','747068','747069','633617','633622','633647','633652','633662','633667','633677','633682','633692','633697','1612800']
-
+variables_details = dict(zip(pd.read_excel(r'system_data\details_variables.xlsx')['name'], pd.read_excel(r'system_data\details_variables.xlsx', dtype={'id_x': str})['id_x']))
 class CustomAPIError(Exception):
     def __init__(self, status_code):
         self.status_code = status_code
@@ -124,14 +123,14 @@ def get_available_data():
     merged['id_x'] = merged['id_x'].astype(str)
     merged.loc[merged['name'].str.contains('wskaźniki'), 'name'] = merged['n1']
 
-    merged[merged['id_x'].isin(variables)].to_excel('details_variabled.xlsx')
-def get_dataset(voivodeships_poland = voivodeships, variables_list = variables):
+    merged[merged['id_x'].isin(list(variables_details.values()))].to_excel('details_variables.xlsx')
+def get_dataset(voivodeships_poland = voivodeships, variables_dict = variables_details):
     """Function to fetch data from an API for specified years"""
     variable_values = []
     for voivodeship in voivodeships_poland:
         row_data = {'Location': None, 'Year': None, 'Key': None}  # Initialize row_data for each location
 
-        for var_id in variables_list:
+        for var_name, var_id in variables_dict.items():
             url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&var-id={var_id}&year=2020'
             try:
                 response = requests.get(url_data_base, headers=headers) #requests.get(url_data_base)#
@@ -140,7 +139,7 @@ def get_dataset(voivodeships_poland = voivodeships, variables_list = variables):
 
                 data = response.json()['results'][0]
 
-                row_data.update({str(var_id): data['values'][0]['val']})
+                row_data.update({str(var_name): data['values'][0]['val']})
 
                 if row_data['Location'] is None:
                     row_data['Location'] = response.json()['unitName']

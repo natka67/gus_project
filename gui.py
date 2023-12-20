@@ -16,13 +16,13 @@ class Gui:
         self.graph = None
         self.canvas = None
         self.ax=None
-        self.variables_details  = dict(zip(pd.read_excel('details_variabled.xlsx')['name'], pd.read_excel('details_variabled.xlsx', dtype={'id_x': str})['id_x']))
-        self.voivodeships_poland = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values).values()
+        self.variables_details  = dict(zip(pd.read_excel(r'system_data\details_variables.xlsx')['name'], pd.read_excel(r'system_data\details_variables.xlsx', dtype={'id_x': str})['id_x']))
+        self.voivodeships_poland = dict(pd.read_excel(r'system_data\voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values).values()
 
     def functionality_choosen(self, option, window):
         match option:
             case 'Pobierz zestaw danych':
-                etl.get_dataset().to_excel('gus.xlsx')
+                etl.get_dataset().to_excel(r'gus.xlsx')
                 self.create_message_window()
             case 'Porównaj obszary':
                 window.destroy()
@@ -132,6 +132,8 @@ class Gui:
             Funkcja zapisuje wykres jako plik PDF.
             """
             file_path = f'{dropdown1.get()}_{dropdown2.get()}_{dropdown3.get()}.pdf'.replace(' ', '_')#tk.filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
+            file_path_base = r"app_data\porownanie_"
+            file_path = file_path_base+file_path
             self.graph.savefig(file_path, format='pdf')
 
         def generate_plot():

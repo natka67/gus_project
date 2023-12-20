@@ -13,7 +13,7 @@ def start_functionality():
     center_y = int((root.winfo_screenheight() - height) / 2)
     root.geometry(f"+{center_x}+{center_y}")
 
-    voivodeships_poland = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values)
+    voivodeships_poland = dict(pd.read_excel(r'system_data\voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values)
 
     voivodeship1 = StringVar()
     voivodeship2 = StringVar()
