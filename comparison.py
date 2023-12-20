@@ -5,7 +5,7 @@ from gui import *
 
 def start_functionality():
     root = Tk()
-    root.title('Comparison')
+    root.title('Porównanie województw')
     height = 120
     width = 450
     root.geometry(f"{width}x{height}")
@@ -35,10 +35,10 @@ def start_functionality():
         root.destroy()
         Gui().start_program()
 
-    button = Button(root, text="Download Comparison", command=button_clicked)
+    button = Button(root, text="Pobierz Porównanie", command=button_clicked)
     button.pack()
 
-    back = Button(root, text="Navigation", command=return_to_menu)
+    back = Button(root, text="Powrót", command=return_to_menu)
     back.pack()
     root.mainloop()
 
@@ -49,6 +49,6 @@ def download_comparison(voivodeships):
     df.iloc[:, 0] = pd.to_numeric(df.iloc[:, 0], errors='coerce')
     df.iloc[:, 1] = pd.to_numeric(df.iloc[:, 1], errors='coerce')
     df['Comparison'] = df.iloc[:, 0] - df.iloc[:, 1]
-    df.to_excel(f'comparison_{'_'.join(df.columns)}.xlsx')
+    df.to_excel(f'porównanie_{'_'.join(df.columns)}.xlsx')
     Gui().create_success_window()
 

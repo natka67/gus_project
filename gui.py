@@ -10,7 +10,7 @@ import comparison
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 class Gui:
     functionalities = sorted(
-        ['Create Visual', 'Create Ranking', 'Check Correlation', 'Compare Areas', 'Download Dataset'])
+        ['Utwórz wizualizację', 'Utwórz ranking', 'Sprawdź korelację', 'Porównaj obszary', 'Pobierz zestaw danych'])
 
     def __init__(self):
         self.graph = None
@@ -18,16 +18,16 @@ class Gui:
 
     def button_click(self,option, window):
         match option:
-            case 'Download Dataset':
+            case 'Pobierz zestaw danych':
                 etl.get_dataset(self.voivodeships_poland).to_excel('gus.xlsx')
                 self.create_success_window()
-            case 'Compare Areas':
+            case 'Porównaj obszary':
                 window.destroy()
                 comparison.start_functionality()
-            case 'Create Visual':
+            case 'Utwórz wizualizację':
                 window.destroy()
                 self.create_window_for_visuals()
-            case _: print("else...")
+            case _: print("inne...")
         pass
     def start_program(self):
         window = tk.Tk()
@@ -48,14 +48,14 @@ class Gui:
     def create_success_window(self):
         root = tk.Tk()
         root.geometry("200x100")
-        root.title("Success")
-        success_label = tk.Label(root, text="Download Succeeded")
+        root.title("Sukces")
+        success_label = tk.Label(root, text="Pobieranie udane")
         success_label.pack(expand=True)
         root.mainloop()
 
     def create_window_for_visuals(self):
         root = tk.Tk()
-        root.title('Visualisation')
+        root.title('Wykresy')
         #root.create_widgets()
         height = 1000
         width = 1720
@@ -68,7 +68,7 @@ class Gui:
 
         def update_ui(*args):
             selected_value = dropdown1.get()
-            if selected_value == "Scatter Plot":
+            if selected_value == "Wykres punktowy":
                 dropdown3.grid()
             else:
                 dropdown3.grid_remove()
@@ -78,13 +78,13 @@ class Gui:
         left_frame.grid(row=0, column=0, sticky="nsew", padx=(0, 5))
 
         # Dropdowns and Buttons
-        ttk.Label(left_frame, text="Type:").grid(row=0, column=0, pady=5, sticky=tk.W)
+        ttk.Label(left_frame, text="Typ wykresu:").grid(row=0, column=0, pady=5, sticky=tk.W)
         dropdown1_var = tk.StringVar()
-        dropdown1 = ttk.Combobox(left_frame, values=['Map', 'Scatter Plot'], state="readonly", textvariable=dropdown1_var, width=40)
+        dropdown1 = ttk.Combobox(left_frame, values=['Mapa', 'Wykres punktowy'], state="readonly", textvariable=dropdown1_var, width=40)
         dropdown1.grid(row=0, column=1, pady=5, padx=(0, 10))
         dropdown1_var.trace_add("write", update_ui)
 
-        ttk.Label(left_frame, text="Column:").grid(row=1, column=0, pady=5, sticky=tk.W)
+        ttk.Label(left_frame, text="Nazwa kolumn(y):").grid(row=1, column=0, pady=5, sticky=tk.W)
         dropdown2 = ttk.Combobox(left_frame, values=col_names, state="readonly", width=40)
         dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))
 
@@ -103,9 +103,9 @@ class Gui:
         def save_as_pdf():
             pass
 
-        ttk.Button(left_frame, text="Refresh Plot", command=generate_plot).grid(row=3, column=0, columnspan=1, pady=10)
-        ttk.Button(left_frame, text="Download Plot", command=save_as_pdf).grid(row=3, column=1, columnspan=1, pady=10)
-        ttk.Button(left_frame, text="Go back", command=return_to_menu).grid(row=3, column=2, columnspan=1, pady=10)
+        ttk.Button(left_frame, text="Załaduj Wykres", command=generate_plot).grid(row=3, column=0, columnspan=1, pady=10)
+        ttk.Button(left_frame, text="Pobierz Wykres", command=save_as_pdf).grid(row=3, column=1, columnspan=1, pady=10)
+        ttk.Button(left_frame, text="Powrót", command=return_to_menu).grid(row=3, column=2, columnspan=1, pady=10)
 
         # Right frame for the plot
         right_frame = ttk.Frame(root)
