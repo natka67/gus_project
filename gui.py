@@ -178,6 +178,6 @@ class Gui:
 if __name__ == "__main__":
     try:
         gui = Gui()
-        gui.create_window_for_visuals() # start_program()
+        gui.start_program() # start_program()
     except Exception as err:
         print(type(err), err)
