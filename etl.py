@@ -4,7 +4,7 @@ api_key = '40e719ee-4329-472f-3e50-08dbfd522f69'
 headers = {'X-ClientId': api_key}
 page_size = 100
 
-voivodeships = dict(pd.read_excel(r'system_data\voivodeships_poland.xlsx', dtype={'id': str})[['name','id']].values).values()
+voivodeships = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['name','id']].values).values()
 variables_dictionary = {
     'K12': {'G603': ['P3820']},
 
@@ -17,7 +17,7 @@ variables_dictionary = {
     'K11': {'G231': [],
             'G619': ['P3953']}
 }
-variables_details = dict(zip(pd.read_excel(r'system_data\details_variables.xlsx')['name'], pd.read_excel(r'system_data\details_variables.xlsx', dtype={'id_x': str})['id_x']))
+variables_details = dict(zip(pd.read_excel('details_variables.xlsx')['name'], pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x']))
 class CustomAPIError(Exception):
     def __init__(self, status_code):
         self.status_code = status_code
@@ -153,5 +153,6 @@ def get_dataset(voivodeships_poland = voivodeships, variables_dict = variables_d
         variable_values.append(pd.DataFrame([row_data]))
 
     result_df = pd.concat(variable_values, ignore_index=True)
+
     return result_df
 

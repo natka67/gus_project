@@ -8,10 +8,10 @@ import geopandas as gpd
 
 import os
 def create_scatter_plot(name_1 = 'nazwa_1', name_2 = 'nazwa_2', id_1='747060',id_2='747061'):
-    df = etl.get_dataset(variables_list=[id_1, id_2])[['Location',id_1, id_2]]
+    df = etl.get_dataset(variables_dict={name_1:id_1,name_2:id_2})[['Location',name_1, name_2]]
 
     plt.figure(figsize=(12, 6))
-    scatter_plot = sns.scatterplot(x=df[id_1], y=df[id_2], hue='Location', data=df, palette='viridis', legend='full')
+    scatter_plot = sns.scatterplot(x=df[name_1], y=df[name_2], hue='Location', data=df, palette='viridis', legend='full')
     scatter_plot.legend(loc='upper left', bbox_to_anchor=(1, 1), borderaxespad=0.5)
 
     # Dodaj tytuł i oznaczenia osi
@@ -24,19 +24,19 @@ def create_scatter_plot(name_1 = 'nazwa_1', name_2 = 'nazwa_2', id_1='747060',id
 
 
 def create_map(name_1='nazwa', id_1='747063'):
-    df = etl.get_dataset(variables_list=[id_1])[['Location',id_1]]
+    df = etl.get_dataset(variables_dict={name_1:id_1})[['Location',name_1]]
     df['JPT_NAZWA_'] = df['Location'].astype(str).str.lower()
-    df = df[['JPT_NAZWA_', id_1]]
+    df = df[['JPT_NAZWA_', name_1]]
     data = gpd.read_file(r'wojewodztwa/wojewodztwa.shp')
     merged_data = pd.merge(data, df, how='left', on='JPT_NAZWA_')
 
     fig, ax = plt.subplots(figsize=(10, 10))
-    merged_data.plot(ax=ax, column=id_1, cmap='viridis', edgecolor='black', legend=True)
+    merged_data.plot(ax=ax, column=name_1, cmap='viridis', edgecolor='black', legend=True)
     ax.set_xticks([])
     ax.set_yticks([])
 
     # Add labels on the districts
-    for x, y, name, value in zip(merged_data.geometry.centroid.x, merged_data.geometry.centroid.y, merged_data['JPT_NAZWA_'], merged_data[id_1]):
+    for x, y, name, value in zip(merged_data.geometry.centroid.x, merged_data.geometry.centroid.y, merged_data['JPT_NAZWA_'], merged_data[name_1]):
         label = f'\n{name}\n{value}'
         ax.text(x, y, label, fontsize=8, ha='center')
     plt.title(f'{name_1}'.capitalize(), wrap=True)

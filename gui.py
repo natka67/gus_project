@@ -16,8 +16,8 @@ class Gui:
         self.graph = None
         self.canvas = None
         self.ax=None
-        self.variables_details  = dict(zip(pd.read_excel(r'system_data\details_variables.xlsx')['name'], pd.read_excel(r'system_data\details_variables.xlsx', dtype={'id_x': str})['id_x']))
-        self.voivodeships_poland = dict(pd.read_excel(r'system_data\voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values).values()
+        self.variables_details  = dict(zip(pd.read_excel('details_variables.xlsx')['name'], pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x']))
+        self.voivodeships_poland = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values).values()
 
     def functionality_choosen(self, option, window):
         match option:
