@@ -138,7 +138,6 @@ def get_dataset(voivodeships_poland = voivodeships, variables_dict = variables_d
                     raise CustomAPIError(response.status_code)
 
                 data = response.json()['results'][0]
-
                 row_data.update({str(var_name): data['values'][0]['val']})
 
                 if row_data['Location'] is None:
@@ -156,3 +155,4 @@ def get_dataset(voivodeships_poland = voivodeships, variables_dict = variables_d
 
     return result_df
 
+get_dataset()
