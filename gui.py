@@ -68,6 +68,8 @@ class Gui:
 
 
 
+
+
     def create_window_for_visuals(self):
         """
         Funkcja tworzy okno do generowania wykresów punktowych i map.
@@ -185,11 +187,3 @@ class Gui:
 
         root.mainloop()
 
-
-if __name__ == "__main__":
-    try:
-        gui = Gui()
-        gui.start_program() # start_program()
-    except Exception as err:
-        Gui().create_message_window(message=f"{str(type(err)).capitalize()}: {err}")
-        print(type(err), err)
