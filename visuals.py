@@ -10,7 +10,9 @@ def create_scatter_plot(name_1 = 'nazwa_1', name_2 = 'nazwa_2', id_1='747060',id
     df = etl.get_dataset(variables_dict={name_1:id_1,name_2:id_2})[['Location',name_1, name_2]]
 
     plt.figure(figsize=(12, 6))
-    scatter_plot = sns.scatterplot(x=df[name_1], y=df[name_2], hue='Location', data=df, palette='viridis', legend='full')
+    marker = "$\u263A$"
+    scatter_plot = sns.scatterplot(x=df[name_1], y=df[name_2], hue='Location', data=df, palette='viridis', legend='full',
+                                   s=100)
     scatter_plot.legend(loc='upper left', bbox_to_anchor=(1, 1), borderaxespad=0.5)
 
     # Dodaj tytuł i oznaczenia osi
@@ -39,5 +41,5 @@ def create_map(name_1='nazwa', id_1='747063'):
         label = f'\n{name}\n{value}'
         ax.text(x, y, label, fontsize=8, ha='center')
     plt.title(f'{name_1}'.capitalize(), wrap=True)
-    # plt.show()
+
     return plt.gcf()
