@@ -145,14 +145,14 @@ def get_available_data():
     merged.to_excel('details_variables.xlsx')
 
 
-def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_details):
+def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_details, year='2020'):
     """Function to fetch data from an API for specified years"""
     variable_values = []
     for voivodeship in voivodeships_poland:
         row_data = {'Location': None, 'Year': None, 'Unit Measure': None, 'Key': None}
 
         for var_name, var_id in variables_dict.items():
-            url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&var-id={var_id}&year=2020'
+            url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&var-id={var_id}&year={year}'
             response = requests.get(url_data_base, headers=headers)
             if response.status_code != 200 or response.json()['totalRecords'] == 0:
                 raise CustomAPIError(response.status_code)
