@@ -1,10 +1,11 @@
 import pandas as pd
 import requests
+
 api_key = '40e719ee-4329-472f-3e50-08dbfd522f69'
 headers = {'X-ClientId': api_key}
 page_size = 100
 
-voivodeships = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['name','id']].values).values()
+voivodeships = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['name', 'id']].values).values()
 variables_dictionary = {
     'K12': {'G603': ['P3820']},
 
@@ -17,7 +18,10 @@ variables_dictionary = {
     'K11': {'G231': [],
             'G619': ['P3953']}
 }
-variables_details = dict(zip(pd.read_excel('details_variables.xlsx')['name'], pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x']))
+variables_details = dict(zip(pd.read_excel('details_variables.xlsx')['name'],
+                             pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x']))
+
+
 class CustomAPIError(Exception):
     def __init__(self, status_code):
         self.status_code = status_code
@@ -35,6 +39,7 @@ class CustomAPIError(Exception):
             return "429 Too Many Requests: Rate limit exceeded. Too many requests in a given amount of time."
         else:
             return f"API Error with status code {self.status_code}"
+
 
 def get_locations():
     ''' Function for one-time data load to get areas ids
@@ -54,7 +59,7 @@ def get_locations():
         response = requests.get(url)
         if response.status_code != 200:
             raise CustomAPIError(response.status_code)
-        #print(response)
+        # print(response)
         areas.extend(response.json()['results'])
     areas_df = pd.DataFrame(areas)
     voivodeships_poland_names = [
@@ -78,6 +83,7 @@ def get_locations():
     areas_df[areas_df['name'].isin(voivodeships_poland_names)].to_excel('voivodeships_poland.xlsx')
     areas_df.to_excel('areas.xlsx')
 
+
 def get_available_data():
     """Function for one time data load , needed for defining variables_id dictionary"""
 
@@ -91,8 +97,8 @@ def get_available_data():
 
     # get subareas for choosen areas
     subareas = []
-    for id in variables_dictionary.keys():
-        url_subarea = url_subarea_base + id
+    for id_key in variables_dictionary.keys():
+        url_subarea = url_subarea_base + id_key
         subarea = requests.get(url_subarea).json()['results']
         subareas.extend(subarea)
     subareas = pd.DataFrame(subareas)
@@ -100,8 +106,8 @@ def get_available_data():
 
     children_id = [k for i in variables_dictionary.values() for k in list(i.keys())]
     children = []
-    for id in children_id:
-        url_children = url_childeren_base + id
+    for child_id in children_id:
+        url_children = url_childeren_base + child_id
         child = requests.get(url_children).json()['results']
         children.extend(child)
     children = pd.DataFrame(children)
@@ -124,7 +130,9 @@ def get_available_data():
     merged.loc[merged['name'].str.contains('wskaźniki'), 'name'] = merged['n1']
 
     merged[merged['id_x'].isin(list(variables_details.values()))].to_excel('details_variables.xlsx')
-def get_dataset(voivodeships_poland = voivodeships, variables_dict = variables_details):
+
+
+def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_details):
     """Function to fetch data from an API for specified years"""
     variable_values = []
     for voivodeship in voivodeships_poland:
@@ -132,27 +140,20 @@ def get_dataset(voivodeships_poland = voivodeships, variables_dict = variables_d
 
         for var_name, var_id in variables_dict.items():
             url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&var-id={var_id}&year=2020'
-            try:
-                response = requests.get(url_data_base, headers=headers) #requests.get(url_data_base)#
-                if response.status_code != 200 or response.json()['totalRecords'] == 0:
-                    raise CustomAPIError(response.status_code)
+            response = requests.get(url_data_base, headers=headers)  # requests.get(url_data_base)#
+            if response.status_code != 200 or response.json()['totalRecords'] == 0:
+                raise CustomAPIError(response.status_code)
 
-                data = response.json()['results'][0]
-                row_data.update({str(var_name): data['values'][0]['val']})
+            data = response.json()['results'][0]
+            row_data.update({str(var_name): data['values'][0]['val']})
 
-                if row_data['Location'] is None:
-                    row_data['Location'] = response.json()['unitName']
-                    row_data['Year'] = data['values'][0]['year']
-                    row_data['Key'] = data['values'][0]['year']+response.json()['unitName']
-
-
-            except CustomAPIError as e:
-                print(f"Error fetching data for Location {voivodeship}, Variable {var_id}: {e}")
+            if row_data['Location'] is None:
+                row_data['Location'] = response.json()['unitName']
+                row_data['Year'] = data['values'][0]['year']
+                row_data['Key'] = data['values'][0]['year'] + response.json()['unitName']
 
         variable_values.append(pd.DataFrame([row_data]))
 
     result_df = pd.concat(variable_values, ignore_index=True)
 
     return result_df
-
-get_dataset()

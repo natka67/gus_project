@@ -2,38 +2,45 @@ from tkinter import ttk
 from matplotlib.figure import Figure
 import tkinter as tk
 import visuals
-import tkinter.filedialog as tkFileDialog
 import pandas as pd
 import etl
 import comparison
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+
+
 class Gui:
-    functionalities = sorted(
-        ['Utwórz wizualizację', 'Utwórz ranking', 'Sprawdź korelację', 'Porównaj obszary', 'Pobierz zestaw danych'])
+    functionalities = sorted(['Utwórz wizualizację', 'Utwórz ranking',
+                              'Sprawdź korelację', 'Porównaj obszary',
+                              'Pobierz zestaw danych'])
 
     def __init__(self):
         self.loaded_graph = False
         self.graph = None
         self.canvas = None
-        self.ax=None
-        self.variables_details  = dict(zip(pd.read_excel('details_variables.xlsx')['name'], pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x']))
-        self.voivodeships_poland = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values).values()
+        self.ax = None
+        self.variables_details = dict(zip(pd.read_excel('details_variables.xlsx')['name'],
+                                          pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x']))
+        self.voivodeships_poland = dict(pd.read_excel('voivodeships_poland.xlsx',
+                                                      dtype={'id': str})[['id', 'name']].values).values()
 
-    def functionality_choosen(self, option, window):
+    def choose_functionality(self, option, window):
         match option:
             case 'Pobierz zestaw danych':
-                etl.get_dataset().to_excel(r'gus.xlsx')
-                self.create_message_window()
+                try:
+                    etl.get_dataset().to_excel(r'gus.xlsx')
+                    self.create_message_window()
+                except Exception as err:
+                    self.create_message_window(message=f"{str(type(err)).capitalize()}: {err}")
             case 'Porównaj obszary':
                 window.destroy()
-                comparison.start_functionality()
+                comparison.compare()
             case 'Utwórz wizualizację':
                 window.destroy()
                 self.create_window_for_visuals()
-            case _: print("inne...")
-        pass
+            case _:
+                print("inne...")
 
-    def create_message_window(self, message ='Sukces'):
+    def create_message_window(self, message='Sukces'):
         """
         Funkcja wyświeta okienko powiadamiające użytkownika o sukcesie pobrania pliku.
         """
@@ -62,13 +69,11 @@ class Gui:
         window.title("Menu")
         # Adding buttons for every available function
         for function in self.functionalities:
-            button = tk.Button(window, text=function, command=lambda option=function: self.functionality_choosen(option, window))
+            button = tk.Button(window,
+                               text=function,
+                               command=lambda option=function: self.choose_functionality(option, window))
             button.pack(pady=5)
         window.mainloop()
-
-
-
-
 
     def create_window_for_visuals(self):
         """
@@ -133,9 +138,8 @@ class Gui:
             """
             Funkcja zapisuje wykres jako plik PDF.
             """
-            file_path = f'{dropdown1.get()}_{dropdown2.get()}_{dropdown3.get()}.pdf'.replace(' ', '_')#tk.filedialog.asksaveasfilename(defaultextension=".pdf", filetypes=[("PDF files", "*.pdf")])
-            file_path_base = r"app_data\porownanie_"
-            file_path = file_path_base+file_path
+            file_path = (f'{dropdown1.get()}_{dropdown2.get()}_{dropdown3.get()}.pdf'
+                         .replace(' ', '_'))
             self.graph.savefig(file_path, format='pdf')
 
         def generate_plot():
@@ -144,29 +148,31 @@ class Gui:
             """
             col_1 = dropdown2.get()
             chart_type = dropdown1.get()
-
-            if chart_type == '':
-                self.create_message_window('Uzupełnij typ wykresu')
-            elif col_1 == '':
-                self.create_message_window('Uzupełnij nazwę kolumny')
-            elif chart_type == 'Wykres punktowy':
-                col_2 = dropdown3.get()
-                if col_2 == '':
+            try:
+                if chart_type == '':
+                    self.create_message_window('Uzupełnij typ wykresu')
+                elif col_1 == '':
                     self.create_message_window('Uzupełnij nazwę kolumny')
-                self.graph = visuals.create_scatter_plot(
-                    name_1=col_1, name_2=col_2,
-                    id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
-                )
-            elif chart_type == 'Mapa':
-                self.graph = visuals.create_map(
-                    name_1=col_1, id_1=self.variables_details[col_1]
-                )
+                elif chart_type == 'Wykres punktowy':
+                    col_2 = dropdown3.get()
+                    if col_2 == '':
+                        self.create_message_window('Uzupełnij nazwę kolumny')
+                    self.graph = visuals.create_scatter_plot(
+                        name_1=col_1, name_2=col_2,
+                        id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
+                    )
+                elif chart_type == 'Mapa':
+                    self.graph = visuals.create_map(
+                        name_1=col_1, id_1=self.variables_details[col_1]
+                    )
 
-            self.canvas.get_tk_widget().destroy()
-            self.canvas = FigureCanvasTkAgg(self.graph, master=right_frame)
-            self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
-            self.canvas.draw()
-            self.loaded_graph = True
+                self.canvas.get_tk_widget().destroy()
+                self.canvas = FigureCanvasTkAgg(self.graph, master=right_frame)
+                self.canvas.get_tk_widget().pack(side=tk.TOP, fill=tk.BOTH, expand=1)
+                self.canvas.draw()
+                self.loaded_graph = True
+            except Exception as err:
+                self.create_message_window(message=f"{str(type(err)).capitalize()}: {err}")
 
         def return_to_menu():
             """
@@ -176,9 +182,24 @@ class Gui:
             self.start_program()
 
         # Przyciski
-        ttk.Button(left_frame, text="Załaduj Wykres", command=generate_plot).grid(row=3, column=0, columnspan=1,                                                      pady=10)
-        ttk.Button(left_frame, text="Pobierz Wykres", command=save_as_pdf).grid(row=3, column=1, columnspan=1, pady=10)
-        ttk.Button(left_frame, text="Powrót", command=return_to_menu).grid(row=3, column=2, columnspan=1, pady=10)
+        ttk.Button(left_frame,
+                   text="Załaduj Wykres",
+                   command=generate_plot).grid(row=3,
+                                               column=0,
+                                               columnspan=1,
+                                               pady=10)
+        ttk.Button(left_frame,
+                   text="Pobierz Wykres",
+                   command=save_as_pdf).grid(row=3,
+                                             column=1,
+                                             columnspan=1,
+                                             pady=10)
+        ttk.Button(left_frame,
+                   text="Powrót",
+                   command=return_to_menu).grid(row=3,
+                                                column=2,
+                                                columnspan=1,
+                                                pady=10)
 
         # Konfiguracja proporcji dla ramek w okienku
         root.grid_rowconfigure(0, weight=1)
@@ -186,4 +207,3 @@ class Gui:
         root.grid_columnconfigure(1, weight=9)
 
         root.mainloop()
-
