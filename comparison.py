@@ -2,6 +2,8 @@ from tkinter import *
 import gui
 import etl
 import pandas as pd
+import xlsxwriter
+
 
 
 def compare():
@@ -52,6 +54,42 @@ def download_comparison(voivodeships):
         df.iloc[:, 0] = pd.to_numeric(df.iloc[:, 0], errors='coerce')
         df.iloc[:, 1] = pd.to_numeric(df.iloc[:, 1], errors='coerce')
         df['Comparison'] = df.iloc[:, 0] - df.iloc[:, 1]
-        df.to_excel(f'porównanie_{'_'.join(df.columns)}.xlsx')
+
+        with pd.ExcelWriter(f'porównanie_{'_'.join(df.columns)}.xlsx', engine='xlsxwriter') as writer:
+            df.to_excel(writer, sheet_name='Sheet1', index=True, header=True)
+
+            # Get the xlsxwriter workbook and worksheet objects.
+            workbook = writer.book
+            worksheet = writer.sheets['Sheet1']
+
+            # Get the number of rows and columns in the dataframe.
+            num_rows, num_cols = df.shape
+
+            # Create a Pandas Excel writer using XlsxWriter as the engine.
+            red_format = workbook.add_format({'font_color': 'red'})
+            green_format = workbook.add_format({'font_color': 'green'})
+            black_format = workbook.add_format({'font_color': 'black'})
+
+            # Apply the conditional formatting based on the specified condition.
+            for row in range(1, num_rows + 1):
+                worksheet.conditional_format(row, num_cols, row, num_cols,
+                                             {'type': 'cell',
+                                              'criteria': '<',
+                                              'value': 0,
+                                              'format': red_format})
+
+                worksheet.conditional_format(row, num_cols, row, num_cols,
+                                             {'type': 'cell',
+                                              'criteria': '=',
+                                              'value': 0,
+                                              'format': black_format})
+
+                worksheet.conditional_format(row, num_cols, row, num_cols,
+                                             {'type': 'cell',
+                                              'criteria': '>',
+                                              'value': 0,
+                                              'format': green_format})
+
+        #df.to_excel(f'porównanie_{'_'.join(df.columns)}.xlsx')
     except Exception as err:
         gui.Gui().create_message_window(message=f"{str(type(err)).capitalize()}: {err}")

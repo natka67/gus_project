@@ -21,6 +21,8 @@ variables_dictionary = {
 variables_details = dict(zip(pd.read_excel('details_variables.xlsx')['name'],
                              pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x']))
 
+data_ids = ['747060', '747061', '747062', '747063', '747064', '747065', '747066', '747067', '747068', '747069']
+
 
 class CustomAPIError(Exception):
     def __init__(self, status_code):
@@ -28,17 +30,17 @@ class CustomAPIError(Exception):
 
     def __str__(self):
         if self.status_code == 404:
-            return "404 Not Found: The requested resource was not found."
+            return "Kod 404: Żądany zasób nie został odnaleziony."
         elif self.status_code == 200:
-            return "Total records returned were equal to 0."
+            return "Liczba zwróconych rekordów wyniosła zero."
         elif self.status_code == 403:
-            return "403 Forbidden: Access to the requested resource is forbidden."
+            return "Kod 403: Dostęp do żądanego zasobu jest zabroniony."
         elif self.status_code == 412:
-            return "412 Precondition Failed: The server's preconditions are not met."
+            return "Kod 412: Nie spełnione warunki wstępne."
         elif self.status_code == 429:
-            return "429 Too Many Requests: Rate limit exceeded. Too many requests in a given amount of time."
+            return "Kod 429: Przekroczono limit żądań w określonym czasie."
         else:
-            return f"API Error with status code {self.status_code}"
+            return f"Błąd API o kodzie statusu {self.status_code}"
 
 
 def get_locations():
@@ -90,6 +92,7 @@ def get_available_data():
     url_areas = 'https://bdl.stat.gov.pl/api/v1/subjects?lang=pl&format=json&page=0&page-size=33'
     url_subarea_base = 'https://bdl.stat.gov.pl/api/v1/subjects?parent-id='  # add parrent id for success
     url_childeren_base = 'https://bdl.stat.gov.pl/api/v1/subjects?parent-id='
+    print(requests.get(url_areas))
 
     main_areas = pd.DataFrame(
         requests.get(url_areas).json()['results'])  # pd.DataFrame(requests.get(url_areas)['results'])
@@ -127,20 +130,30 @@ def get_available_data():
     var_df = pd.DataFrame(var_list)
     merged = pd.merge(var_df, children, how='left', left_on='subjectId', right_on='id')
     merged['id_x'] = merged['id_x'].astype(str)
-    merged.loc[merged['name'].str.contains('wskaźniki'), 'name'] = merged['n1']
+    merged = merged[
+        (merged['subjectId'] == 'P3820') |
+        ((merged['subjectId'] == 'P3953') & (merged['n1'] == 'ogółem')) |
+        ((merged['n1'] == 'ogółem') & (merged['n2'] == 'ogółem'))]
 
-    merged[merged['id_x'].isin(list(variables_details.values()))].to_excel('details_variables.xlsx')
+    merged.loc[merged['name'].str.contains('wskaźniki'), 'name'] = merged['n1']
+    merged['merged_column'] = merged.apply(
+        lambda row: row['name'].capitalize() if row['measureUnitName'] == '-' else f"{row['name']} ({row['measureUnitName']})".capitalize() ,
+        axis=1)
+    merged = merged.drop(['name', 'measureUnitName'], axis=1)
+    merged = merged.rename(columns={'merged_column': 'name'})
+
+    merged.to_excel('details_variables.xlsx')
 
 
 def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_details):
     """Function to fetch data from an API for specified years"""
     variable_values = []
     for voivodeship in voivodeships_poland:
-        row_data = {'Location': None, 'Year': None, 'Key': None}  # Initialize row_data for each location
+        row_data = {'Location': None, 'Year': None, 'Unit Measure': None, 'Key': None}
 
         for var_name, var_id in variables_dict.items():
             url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&var-id={var_id}&year=2020'
-            response = requests.get(url_data_base, headers=headers)  # requests.get(url_data_base)#
+            response = requests.get(url_data_base, headers=headers)
             if response.status_code != 200 or response.json()['totalRecords'] == 0:
                 raise CustomAPIError(response.status_code)
 

@@ -113,14 +113,17 @@ class Gui:
         dropdown1_var = tk.StringVar()
         dropdown1 = ttk.Combobox(left_frame, values=['Mapa', 'Wykres punktowy'], state="readonly",
                                  textvariable=dropdown1_var, width=40)
+        dropdown1_var.set('Mapa')
         dropdown1.grid(row=0, column=1, pady=5, padx=(0, 10))
         dropdown1_var.trace_add("write", update_ui)
 
         ttk.Label(left_frame, text="Nazwa kolumn(y):").grid(row=1, column=0, pady=5, sticky=tk.W)
         dropdown2 = ttk.Combobox(left_frame, values=col_names, state="readonly", width=40)
+        dropdown2.set(col_names[0])
         dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))
 
         dropdown3 = ttk.Combobox(left_frame, values=col_names, state="readonly", width=40)
+        dropdown3.set(col_names[1])
         dropdown3.grid(row=2, column=1, pady=5, padx=(0, 10))
         dropdown3.grid_remove()
 
