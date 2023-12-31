@@ -1,3 +1,4 @@
+#zmiana
 from tkinter import ttk
 from matplotlib.figure import Figure
 import tkinter as tk
