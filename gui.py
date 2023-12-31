@@ -1,6 +1,8 @@
 from tkinter import ttk
 from matplotlib.figure import Figure
 import tkinter as tk
+
+import topsis
 import visuals
 import pandas as pd
 import etl
@@ -38,7 +40,7 @@ class Gui:
                 window.destroy()
                 self.create_window_for_visuals()
             case 'Utwórz ranking':
-                print("TOPSIS")
+                topsis.create_ranking()
                 self.create_message_window()
             case _:
                 print("inne...")
