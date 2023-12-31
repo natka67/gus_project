@@ -1,4 +1,3 @@
-#zmiana
 from tkinter import ttk
 from matplotlib.figure import Figure
 import tkinter as tk
@@ -38,6 +37,9 @@ class Gui:
             case 'Utwórz wizualizację':
                 window.destroy()
                 self.create_window_for_visuals()
+            case 'Utwórz ranking':
+                print("TOPSIS")
+                self.create_message_window()
             case _:
                 print("inne...")
 
