@@ -40,8 +40,8 @@ class Gui:
                 window.destroy()
                 self.create_window_for_visuals()
             case 'Utwórz ranking':
+                window.destroy()
                 topsis.create_ranking()
-                self.create_message_window()
             case _:
                 print("inne...")
 
@@ -59,7 +59,7 @@ class Gui:
         root.title("Powiadomienie")
         success_label = tk.Label(root, text=message)
         success_label.pack(expand=True)
-        root.after(3000, root.destroy)
+        #root.after(3000, root.destroy)
         root.mainloop()
 
     def start_program(self):
