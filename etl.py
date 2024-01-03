@@ -173,6 +173,7 @@ def get_dataset_old(voivodeships_poland=voivodeships, variables_dict=variables_d
 
 def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_details, year='2020'):
     """Function to fetch data from an API for specified years"""
+
     variable_values = []
     for voivodeship in voivodeships_poland:
         url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&year={year}'

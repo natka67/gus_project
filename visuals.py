@@ -1,11 +1,9 @@
-from matplotlib import pyplot as plt
 import seaborn as sns
 import etl
 import matplotlib.pyplot as plt
 import pandas as pd
 import geopandas as gpd
 
-import os
 def create_scatter_plot(name_1 = 'nazwa_1', name_2 = 'nazwa_2', id_1='747060',id_2='747061'):
     df = etl.get_dataset(variables_dict={id_1:name_1,id_2:name_2})[['Location',name_1, name_2]]
 
@@ -30,7 +28,7 @@ def create_map(name_1='nazwa', id_1='747063'):
     merged_data = pd.merge(data, df, how='left', on='JPT_NAZWA_')
 
     fig, ax = plt.subplots(figsize=(10, 10))
-    merged_data.plot(ax=ax, column=name_1, cmap='viridis', edgecolor='black', legend=True, legend_kwds={'shrink': 0.75})
+    merged_data.plot(ax=ax, column=name_1, cmap='viridis', edgecolor='black', legend=True, legend_kwds={'shrink': 0.7})
     ax.set_xticks([])
     ax.set_yticks([])
 
