@@ -18,8 +18,8 @@ variables_dictionary = {
     'K11': {'G231': [],
             'G619': ['P3953']}
 }
-variables_details = dict(zip(pd.read_excel('details_variables.xlsx')['name'],
-                             pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x']))
+variables_details = dict(zip(pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x'],
+                             pd.read_excel('details_variables.xlsx')['name']))
 
 data_ids = ['747060', '747061', '747062', '747063', '747064', '747065', '747066', '747067', '747068', '747069']
 
@@ -145,13 +145,13 @@ def get_available_data():
     merged.to_excel('details_variables.xlsx')
 
 
-def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_details, year='2020'):
+def get_dataset_old(voivodeships_poland=voivodeships, variables_dict=variables_details, year='2020'):
     """Function to fetch data from an API for specified years"""
     variable_values = []
     for voivodeship in voivodeships_poland:
         row_data = {'Location': None, 'Year': None, 'Unit Measure': None, 'Key': None}
 
-        for var_name, var_id in variables_dict.items():
+        for var_id, var_name in variables_dict.items():
             url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&var-id={var_id}&year={year}'
             response = requests.get(url_data_base, headers=headers)
             if response.status_code != 200 or response.json()['totalRecords'] == 0:
@@ -169,4 +169,32 @@ def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_detai
 
     result_df = pd.concat(variable_values, ignore_index=True)
 
+    return result_df
+
+def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_details, year='2020'):
+    """Function to fetch data from an API for specified years"""
+    variable_values = []
+    for voivodeship in voivodeships_poland:
+        url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&year={year}'
+
+        for var_id in variables_dict.keys():
+            url_data_base = url_data_base + f'&var-id={var_id}'
+
+        response = requests.get(url_data_base, headers=headers)
+
+        if response.status_code != 200 or response.json()['totalRecords'] == 0:
+            raise CustomAPIError(response.status_code)
+
+        data = response.json()['results']
+        row_data = {'Location': None, 'Year': None, 'Unit Measure': None, 'Key': None}
+
+        for item in data:
+            if row_data['Location'] is None:
+                row_data['Location'] = response.json()['unitName']
+                row_data['Year'] = item['values'][0]['year']
+                row_data['Key'] = item['values'][0]['year'] + response.json()['unitName']
+            row_data.update({variables_dict[str(item['id'])]: item['values'][0]['val']})
+        variable_values.append(row_data)
+
+    result_df = pd.DataFrame(variable_values)
     return result_df
