@@ -1,6 +1,8 @@
 from tkinter import ttk
 from matplotlib.figure import Figure
 import tkinter as tk
+
+import topsis
 import visuals
 import pandas as pd
 import etl
@@ -37,6 +39,9 @@ class Gui:
             case 'Utwórz wizualizację':
                 window.destroy()
                 self.create_window_for_visuals()
+            case 'Utwórz ranking':
+                window.destroy()
+                topsis.create_ranking()
             case _:
                 print("inne...")
 
@@ -54,7 +59,7 @@ class Gui:
         root.title("Powiadomienie")
         success_label = tk.Label(root, text=message)
         success_label.pack(expand=True)
-        root.after(3000, root.destroy)
+        #root.after(3000, root.destroy)
         root.mainloop()
 
     def start_program(self):
