@@ -5,7 +5,7 @@ import pandas as pd
 import xlsxwriter
 import numpy as np
 
-data = pd.read_excel("gus.xlsx", usecols="B,F:U", index_col=0)
+data = pd.read_excel("gus.xlsx", usecols="B,D:S", index_col=0)
 def create_ranking():
     root = Tk()
     root.title('Ranking województw - metoda TOPSIS')

@@ -177,9 +177,11 @@ def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_detai
     variable_values = []
     for voivodeship in voivodeships_poland:
         url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&year={year}'
-
+        variables_amount = 0
         for var_id in variables_dict.keys():
             url_data_base = url_data_base + f'&var-id={var_id}'
+            variables_amount = variables_amount+1
+        url_data_base = url_data_base + f'&page-size={variables_amount}'
 
         response = requests.get(url_data_base, headers=headers)
 
@@ -187,15 +189,17 @@ def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_detai
             raise CustomAPIError(response.status_code)
 
         data = response.json()['results']
-        row_data = {'Location': None, 'Year': None, 'Unit Measure': None, 'Key': None}
+
+        row_data = {'Location': None, 'Year': None}
 
         for item in data:
             if row_data['Location'] is None:
                 row_data['Location'] = response.json()['unitName']
                 row_data['Year'] = item['values'][0]['year']
-                row_data['Key'] = item['values'][0]['year'] + response.json()['unitName']
             row_data.update({variables_dict[str(item['id'])]: item['values'][0]['val']})
         variable_values.append(row_data)
 
     result_df = pd.DataFrame(variable_values)
     return result_df
+
+
