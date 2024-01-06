@@ -62,6 +62,7 @@ def create_piechart(name_1='nazwa', id_1='747063'):
               "turquoise", "violet", "coral", "olivedrab")
     plt.pie(df[name_1], labels=df['Location'], autopct='%1.1f%%', startangle=90, colors = colors)
     plt.subplots_adjust(left=0.2, right=0.8, top=0.95, bottom=0.1)
+    plt.title('Wykres kołowy')
 
 
     return plt.gcf()
