@@ -89,8 +89,8 @@ class Gui:
         root.title('Wykresy')
 
         # Ustawienia rozmiaru i położenia okna
-        height = 1000
-        width = 1720
+        height = 650
+        width = 1200
         root.geometry(f"{width}x{height}")
         center_x = int((root.winfo_screenwidth() - width) / 2)
         center_y = int((root.winfo_screenheight() - height) / 2)
@@ -98,6 +98,8 @@ class Gui:
 
         # Odczyt nazw kolumn dostępnych do użycia z pliku Excel
         col_names = list(self.variables_details.keys())
+        col_names_for_piechart = [col_names[0], col_names[1], col_names[2], col_names[6], col_names[7],
+                                  col_names[8], col_names[10], col_names[15]]
 
         def update_ui(*args):
             """
@@ -108,6 +110,16 @@ class Gui:
                 dropdown3.grid()
             else:
                 dropdown3.grid_remove()
+            if selected_value == "Wykres kołowy":
+                dropdown2 = ttk.Combobox(left_frame, values=col_names_for_piechart, state="readonly", width=40)
+                dropdown2.set(col_names_for_piechart[0])
+                dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))
+            else:
+                dropdown2 = ttk.Combobox(left_frame, values=col_names, state="readonly", width=40)
+                dropdown2.set(col_names[0])
+                dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))
+
+
 
         # Ramka po lewej stronie przeznaczona na liste opcji i przyciski
         left_frame = ttk.Frame(root, padding=10)
@@ -116,7 +128,7 @@ class Gui:
         # Listy opcji
         ttk.Label(left_frame, text="Typ wykresu:").grid(row=0, column=0, pady=5, sticky=tk.W)
         dropdown1_var = tk.StringVar()
-        dropdown1 = ttk.Combobox(left_frame, values=['Mapa', 'Wykres punktowy'], state="readonly",
+        dropdown1 = ttk.Combobox(left_frame, values=['Mapa', 'Wykres punktowy', 'Wykres kolumnowy', 'Wykres kołowy'], state="readonly",
                                  textvariable=dropdown1_var, width=40)
         dropdown1_var.set('Mapa')
         dropdown1.grid(row=0, column=1, pady=5, padx=(0, 10))
@@ -171,6 +183,14 @@ class Gui:
                     )
                 elif chart_type == 'Mapa':
                     self.graph = visuals.create_map(
+                        name_1=col_1, id_1=self.variables_details[col_1]
+                    )
+                elif chart_type == 'Wykres kolumnowy':
+                   self.graph = visuals.create_bargraph(
+                        name_1=col_1, id_1=self.variables_details[col_1]
+                    )
+                elif chart_type == 'Wykres kołowy':
+                   self.graph = visuals.create_piechart(
                         name_1=col_1, id_1=self.variables_details[col_1]
                     )
 
