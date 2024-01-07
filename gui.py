@@ -12,8 +12,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 class Gui:
     functionalities = sorted(['Utwórz wizualizację', 'Utwórz ranking',
-                              'Sprawdź korelację', 'Porównaj obszary',
-                              'Pobierz zestaw danych'])
+                             'Porównaj obszary', 'Pobierz zestaw danych'])
 
     def __init__(self):
         self.loaded_graph = False
@@ -65,7 +64,7 @@ class Gui:
     def start_program(self):
         window = tk.Tk()
         # Displaying window at the center of a screen
-        height = 225
+        height = 200
         width = 450
         window.geometry(f"{width}x{height}")
         center_x = int((window.winfo_screenwidth() - width) / 2)
