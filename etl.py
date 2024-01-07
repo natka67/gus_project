@@ -79,7 +79,6 @@ def get_locations():
     areas_df[areas_df['name'].isin(voivodeships_poland_names)].to_excel('voivodeships_poland.xlsx')
     areas_df.to_excel('areas.xlsx')
 
-
 def get_available_data():
     """Function for one time data load , needed for defining variables_id dictionary"""
 
