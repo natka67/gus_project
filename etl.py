@@ -1,11 +1,10 @@
 import pandas as pd
 import requests
 
-api_key = '40e719ee-4329-472f-3e50-08dbfd522f69'
-headers = {'X-ClientId': api_key}
+headers1 = {'X-ClientId': '6e0a1952-d481-4c53-7040-08dc0ec6f24d'}
+headers2 = {'X-ClientId': '40e719ee-4329-472f-3e50-08dbfd522f69'}
 page_size = 100
 
-voivodeships = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['name', 'id']].values).values()
 variables_dictionary = {
     'K12': {'G603': ['P3820']},
 
@@ -18,11 +17,6 @@ variables_dictionary = {
     'K11': {'G231': [],
             'G619': ['P3953']}
 }
-variables_details = dict(zip(pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x'],
-                             pd.read_excel('details_variables.xlsx')['name']))
-
-data_ids = ['747060', '747061', '747062', '747063', '747064', '747065', '747066', '747067', '747068', '747069']
-
 
 class CustomAPIError(Exception):
     def __init__(self, status_code):
@@ -47,7 +41,7 @@ def get_locations():
     ''' Function for one-time data load to get areas ids
         Saves the result to an Excel file named areas.xlsx '''
     # Get the total number of areas
-    response = requests.get('https://bdl.stat.gov.pl/api/v1/units?format=json&page=0&page-size=30')
+    response = requests.get('https://bdl.stat.gov.pl/api/v1/units?format=json&page=0&page-size=30', headers=headers1)
 
     if response.status_code != 200:
         raise CustomAPIError(response.status_code)
@@ -58,7 +52,7 @@ def get_locations():
     # Get data from all pages
     for page_number in range(page_amount):
         url = f'https://bdl.stat.gov.pl/api/v1/units?format=json&page={page_number}&page-size={page_size}'
-        response = requests.get(url)
+        response = requests.get(url, headers=headers1)
         if response.status_code != 200:
             raise CustomAPIError(response.status_code)
         # print(response)
@@ -92,17 +86,17 @@ def get_available_data():
     url_areas = 'https://bdl.stat.gov.pl/api/v1/subjects?lang=pl&format=json&page=0&page-size=33'
     url_subarea_base = 'https://bdl.stat.gov.pl/api/v1/subjects?parent-id='  # add parrent id for success
     url_childeren_base = 'https://bdl.stat.gov.pl/api/v1/subjects?parent-id='
-    print(requests.get(url_areas))
+    #print(requests.get(url_areas, headers=headers1))
 
     main_areas = pd.DataFrame(
-        requests.get(url_areas).json()['results'])  # pd.DataFrame(requests.get(url_areas)['results'])
+        requests.get(url_areas, headers=headers1).json()['results'])  # pd.DataFrame(requests.get(url_areas)['results'])
     main_areas.to_excel('main_areas.xlsx')
 
     # get subareas for choosen areas
     subareas = []
     for id_key in variables_dictionary.keys():
         url_subarea = url_subarea_base + id_key
-        subarea = requests.get(url_subarea).json()['results']
+        subarea = requests.get(url_subarea, headers=headers1).json()['results']
         subareas.extend(subarea)
     subareas = pd.DataFrame(subareas)
     subareas.to_excel('subareas.xlsx')
@@ -111,7 +105,7 @@ def get_available_data():
     children = []
     for child_id in children_id:
         url_children = url_childeren_base + child_id
-        child = requests.get(url_children).json()['results']
+        child = requests.get(url_children, headers=headers1).json()['results']
         children.extend(child)
     children = pd.DataFrame(children)
     children.to_excel('children.xlsx')
@@ -122,7 +116,7 @@ def get_available_data():
     var_list = []
     for id in ids:
         url_variable = f'https://bdl.stat.gov.pl/api/v1/variables?subject-id={id}&year=2020&format=json'
-        variable = requests.get(url_variable).json()['results']
+        variable = requests.get(url_variable, headers=headers1).json()['results']
         var_list.extend(variable)
         variable_df = pd.DataFrame(variable)
         with pd.ExcelWriter('variables.xlsx', engine='openpyxl', mode='a') as writer:
@@ -144,32 +138,17 @@ def get_available_data():
 
     merged.to_excel('details_variables.xlsx')
 
+try:
+    voivodeships = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['name', 'id']].values).values()
+    variables_details = dict(zip(pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x'],
+                                 pd.read_excel('details_variables.xlsx')['name']))
+except FileNotFoundError:
+    get_locations()
+    get_available_data()
+    voivodeships = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['name', 'id']].values).values()
+    variables_details = dict(zip(pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x'],
+                                 pd.read_excel('details_variables.xlsx')['name']))
 
-def get_dataset_old(voivodeships_poland=voivodeships, variables_dict=variables_details, year='2020'):
-    """Function to fetch data from an API for specified years"""
-    variable_values = []
-    for voivodeship in voivodeships_poland:
-        row_data = {'Location': None, 'Year': None, 'Unit Measure': None, 'Key': None}
-
-        for var_id, var_name in variables_dict.items():
-            url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&var-id={var_id}&year={year}'
-            response = requests.get(url_data_base, headers=headers)
-            if response.status_code != 200 or response.json()['totalRecords'] == 0:
-                raise CustomAPIError(response.status_code)
-
-            data = response.json()['results'][0]
-            row_data.update({str(var_name): data['values'][0]['val']})
-
-            if row_data['Location'] is None:
-                row_data['Location'] = response.json()['unitName']
-                row_data['Year'] = data['values'][0]['year']
-                row_data['Key'] = data['values'][0]['year'] + response.json()['unitName']
-
-        variable_values.append(pd.DataFrame([row_data]))
-
-    result_df = pd.concat(variable_values, ignore_index=True)
-
-    return result_df
 
 def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_details, year='2020'):
     """Function to fetch data from an API for specified years"""
@@ -183,7 +162,7 @@ def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_detai
             variables_amount = variables_amount+1
         url_data_base = url_data_base + f'&page-size={variables_amount}'
 
-        response = requests.get(url_data_base, headers=headers)
+        response = requests.get(url_data_base, headers=headers2)
 
         if response.status_code != 200 or response.json()['totalRecords'] == 0:
             raise CustomAPIError(response.status_code)
