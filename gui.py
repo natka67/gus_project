@@ -109,6 +109,7 @@ class Gui:
                 dropdown3.grid()
             else:
                 dropdown3.grid_remove()
+
             if selected_value == "Wykres kołowy":
                 dropdown2 = ttk.Combobox(left_frame, values=col_names_for_piechart, state="readonly", width=40)
                 dropdown2.set(col_names_for_piechart[0])
@@ -134,6 +135,7 @@ class Gui:
         dropdown1_var.trace_add("write", update_ui)
 
         ttk.Label(left_frame, text="Nazwa kolumn(y):").grid(row=1, column=0, pady=5, sticky=tk.W)
+
         dropdown2 = ttk.Combobox(left_frame, values=col_names, state="readonly", width=40)
         dropdown2.set(col_names[0])
         dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))

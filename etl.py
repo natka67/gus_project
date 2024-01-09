@@ -150,7 +150,6 @@ except FileNotFoundError:
 
 
 def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_details, year='2020'):
-    """Function to fetch data from an API for specified years"""
 
     variable_values = []
     for voivodeship in voivodeships_poland:

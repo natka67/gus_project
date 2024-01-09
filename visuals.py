@@ -3,9 +3,10 @@ import etl
 import matplotlib.pyplot as plt
 import pandas as pd
 import geopandas as gpd
+import numpy as np
 
 
-def create_scatter_plot(name_1 ='nazwa_1', name_2='nazwa_2', id_1='747060', id_2='747061'):
+def create_scatter_plot(name_1, name_2, id_1, id_2):
     df = etl.get_dataset(variables_dict={id_1: name_1, id_2:name_2})[['Location', name_1, name_2]]
 
     plt.figure(figsize=(10, 5))
@@ -22,7 +23,7 @@ def create_scatter_plot(name_1 ='nazwa_1', name_2='nazwa_2', id_1='747060', id_2
     return plt.gcf()
 
 
-def create_map(name_1='nazwa', id_1='747063'):
+def create_map(name_1, id_1):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
     df['JPT_NAZWA_'] = df['Location'].astype(str).str.lower()
     df = df[['JPT_NAZWA_', name_1]]
@@ -42,12 +43,28 @@ def create_map(name_1='nazwa', id_1='747063'):
 
     return plt.gcf()
 
+def create_heatmap():
+    df = etl.get_dataset().drop(columns=['Location', 'Year'])#voivodeships_poland=[id])
+    corr = df.corr(method='pearson')
+    mask = np.triu(np.ones_like(corr, dtype=bool))
+    plt.figure(figsize=(10, 5))
+    corr_plot = sns.heatmap(corr,annot=True, mask=mask, cmap="crest", vmax=.3, center=0,
+                square=True, linewidths=.5, cbar_kws={"shrink": .5}, annot_kws={'size': 6.5})
+    corr_plot.set_xticklabels(corr_plot.get_xticklabels(), size=5)  # Ustawienie rozmiaru etykiet osi x
+    corr_plot.set_yticklabels(corr_plot.get_yticklabels(), size=5)
+
+    plt.title(f'Korelacja zmiennych')
+    plt.subplots_adjust(left=0.1, right=0.7, top=0.9, bottom=0.15)
+    plt.show()
+    #return plt.gcf()
+
+def create_mosaic_plot():
+    pass
 
 def create_bargraph(name_1='nazwa', id_1='747063'):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
 
-    plt.bar(df['Location'], df[name_1], color='maroon',
-            width=0.4)
+    plt.bar(df['Location'], df[name_1], color='maroon', width=0.4)
 
     plt.title('Wykres kolumnowy')
     plt.xlabel("Województwo")
