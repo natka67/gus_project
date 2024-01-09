@@ -9,7 +9,7 @@ data = pd.read_excel("gus.xlsx", usecols="B,D:S", index_col=0)
 def create_ranking():
     root = Tk()
     root.title('Ranking województw - metoda TOPSIS')
-    width = 1100
+    width = 1400
     height = 600
     root.geometry(f"{width}x{height}")
     center_x = int((root.winfo_screenwidth() - width) / 2)

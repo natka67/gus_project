@@ -2,7 +2,6 @@ from tkinter import *
 import gui
 import etl
 import pandas as pd
-import xlsxwriter
 
 
 
@@ -55,7 +54,7 @@ def download_comparison(voivodeships):
         df.iloc[:, 1] = pd.to_numeric(df.iloc[:, 1], errors='coerce')
         df['Comparison'] = df.iloc[:, 0] - df.iloc[:, 1]
 
-        with pd.ExcelWriter(f'porównanie_{'_'.join(df.columns)}.xlsx', engine='xlsxwriter') as writer:
+        with pd.ExcelWriter(f"porównanie_{'_'.join(df.columns)}.xlsx", engine='xlsxwriter') as writer:
             df.to_excel(writer, sheet_name='Sheet1', index=True, header=True)
 
             # Get the xlsxwriter workbook and worksheet objects.
