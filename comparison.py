@@ -4,7 +4,6 @@ import etl
 import pandas as pd
 
 
-
 def compare():
     root = Tk()
     root.title('Porównanie województw')

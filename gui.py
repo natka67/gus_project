@@ -41,6 +41,9 @@ class Gui:
             case 'Utwórz ranking':
                 window.destroy()
                 topsis.create_ranking()
+            case 'Sprawdź zależność zmiennych':
+                window.destroy()
+                self.create_window_for_visuals()
             case _:
                 print("inne...")
 
@@ -105,7 +108,7 @@ class Gui:
             Funkcja do aktualizacji interfejsu użytkownika w zależności od wybranej wartości w dropdownie.
             """
             selected_value = dropdown1.get()
-            if selected_value == "Wykres punktowy":
+            if selected_value in ["Wykres punktowy", 'Heatmap']:
                 dropdown3.grid()
             else:
                 dropdown3.grid_remove()
@@ -128,7 +131,7 @@ class Gui:
         # Listy opcji
         ttk.Label(left_frame, text="Typ wykresu:").grid(row=0, column=0, pady=5, sticky=tk.W)
         dropdown1_var = tk.StringVar()
-        dropdown1 = ttk.Combobox(left_frame, values=['Mapa', 'Wykres punktowy', 'Wykres kolumnowy', 'Wykres kołowy'], state="readonly",
+        dropdown1 = ttk.Combobox(left_frame, values=['Mapa', 'Wykres punktowy', 'Wykres kolumnowy', 'Wykres kołowy', 'Heatmap'], state="readonly",
                                  textvariable=dropdown1_var, width=40)
         dropdown1_var.set('Mapa')
         dropdown1.grid(row=0, column=1, pady=5, padx=(0, 10))
@@ -179,6 +182,12 @@ class Gui:
                     if col_2 == '':
                         self.create_message_window('Uzupełnij nazwę kolumny')
                     self.graph = visuals.create_scatter_plot(
+                        name_1=col_1, name_2=col_2,
+                        id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
+                    )
+                elif chart_type == 'Heatmap':
+                    col_2 = dropdown3.get()
+                    self.graph = visuals.create_heatmap(
                         name_1=col_1, name_2=col_2,
                         id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
                     )

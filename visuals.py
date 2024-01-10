@@ -43,23 +43,22 @@ def create_map(name_1, id_1):
 
     return plt.gcf()
 
-def create_heatmap():
-    df = etl.get_dataset().drop(columns=['Location', 'Year'])#voivodeships_poland=[id])
-    corr = df.corr(method='pearson')
-    mask = np.triu(np.ones_like(corr, dtype=bool))
+def create_heatmap(name_1, name_2, id_1, id_2):
+    df = etl.get_dataset(variables_dict={id_1: name_1, id_2:name_2})[[name_1, name_2]].corr()
     plt.figure(figsize=(10, 5))
-    corr_plot = sns.heatmap(corr,annot=True, mask=mask, cmap="crest", vmax=.3, center=0,
-                square=True, linewidths=.5, cbar_kws={"shrink": .5}, annot_kws={'size': 6.5})
-    corr_plot.set_xticklabels(corr_plot.get_xticklabels(), size=5)  # Ustawienie rozmiaru etykiet osi x
-    corr_plot.set_yticklabels(corr_plot.get_yticklabels(), size=5)
+    scatter_plot = sns.heatmap(df, vmin=-1, vmax=1, linewidths=.5, annot=True,cmap="YlGnBu")
 
-    plt.title(f'Korelacja zmiennych')
+    # Dodanie tytuł i oznaczenia osi
+    plt.title('Heatmap')
+    x_label = plt.xlabel(name_1.capitalize(), wrap=True)
+    x_label.set_wrap(True)
+
+    y_label = plt.ylabel(name_2.capitalize(), wrap=True)
+    y_label.set_wrap(True)
+
     plt.subplots_adjust(left=0.1, right=0.7, top=0.9, bottom=0.15)
-    plt.show()
-    #return plt.gcf()
-
-def create_mosaic_plot():
-    pass
+    #plt.show()
+    return plt.gcf()
 
 def create_bargraph(name_1='nazwa', id_1='747063'):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
