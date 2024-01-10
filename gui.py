@@ -100,8 +100,7 @@ class Gui:
 
         # Odczyt nazw kolumn dostępnych do użycia z pliku Excel
         col_names = list(self.variables_details.keys())
-        col_names_for_piechart = [col_names[0], col_names[1], col_names[2], col_names[6], col_names[7],
-                                  col_names[8], col_names[10], col_names[15]]
+
 
         def update_ui(*args):
             """
@@ -113,14 +112,21 @@ class Gui:
             else:
                 dropdown3.grid_remove()
 
+
             if selected_value == "Wykres kołowy":
+                dropdown2['values'] = [col_names[0], col_names[1], col_names[2], col_names[6], col_names[7],
+                                  col_names[8], col_names[10], col_names[15]]
+            else:
+                dropdown2['values'] = col_names
+            #tworzenie pola w tej funcji psuło nam wizualizacje
+            """if selected_value == "Wykres kołowy":
                 dropdown2 = ttk.Combobox(left_frame, values=col_names_for_piechart, state="readonly", width=40)
                 dropdown2.set(col_names_for_piechart[0])
                 dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))
             else:
                 dropdown2 = ttk.Combobox(left_frame, values=col_names, state="readonly", width=40)
                 dropdown2.set(col_names[0])
-                dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))
+                dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))"""
 
 
 
@@ -188,7 +194,7 @@ class Gui:
                 elif chart_type == 'Heatmap':
                     col_2 = dropdown3.get()
                     self.graph = visuals.create_heatmap(
-                        name_1=col_1, name_2=col_2,
+                        name_1=dropdown2.get(), name_2=col_2,
                         id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
                     )
                 elif chart_type == 'Mapa':

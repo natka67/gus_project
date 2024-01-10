@@ -3,7 +3,19 @@ import etl
 import matplotlib.pyplot as plt
 import pandas as pd
 import geopandas as gpd
-import numpy as np
+import textwrap
+def wrap_labels(ax, width):
+    labels = []
+    for label in ax.get_xticklabels():
+        text = label.get_text()
+        labels.append(textwrap.fill(text, width=width, break_long_words=True))
+    ax.set_xticklabels(labels, rotation=0)
+    labels.clear()
+
+    for label in ax.get_yticklabels():
+        text = label.get_text()
+        labels.append(textwrap.fill(text, width=width, break_long_words=False))
+    ax.set_yticklabels(labels, rotation=0)
 
 
 def create_scatter_plot(name_1, name_2, id_1, id_2):
@@ -21,7 +33,6 @@ def create_scatter_plot(name_1, name_2, id_1, id_2):
     plt.subplots_adjust(left=0.1, right=0.7, top=0.9, bottom=0.15)
     # plt.show()
     return plt.gcf()
-
 
 def create_map(name_1, id_1):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
@@ -46,21 +57,14 @@ def create_map(name_1, id_1):
 def create_heatmap(name_1, name_2, id_1, id_2):
     df = etl.get_dataset(variables_dict={id_1: name_1, id_2:name_2})[[name_1, name_2]].corr()
     plt.figure(figsize=(10, 5))
-    scatter_plot = sns.heatmap(df, vmin=-1, vmax=1, linewidths=.5, annot=True,cmap="YlGnBu")
-
-    # Dodanie tytuł i oznaczenia osi
-    plt.title('Heatmap')
-    x_label = plt.xlabel(name_1.capitalize(), wrap=True)
-    x_label.set_wrap(True)
-
-    y_label = plt.ylabel(name_2.capitalize(), wrap=True)
-    y_label.set_wrap(True)
-
-    plt.subplots_adjust(left=0.1, right=0.7, top=0.9, bottom=0.15)
-    #plt.show()
+    heatmap = sns.heatmap(df, vmin=-1, vmax=1, linewidths=.5, annot=True,cmap="YlGnBu")
+    # Dodanie tytułu i oznaczenia osi
+    plt.subplots_adjust(left=0.3, right=0.9, top=0.9, bottom=0.3)
+    heatmap.set(xlabel="", ylabel="", title='Heatmap')
+    wrap_labels(heatmap, 25)
     return plt.gcf()
 
-def create_bargraph(name_1='nazwa', id_1='747063'):
+def create_bargraph(name_1, id_1):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
 
     plt.bar(df['Location'], df[name_1], color='maroon', width=0.4)
@@ -72,7 +76,7 @@ def create_bargraph(name_1='nazwa', id_1='747063'):
     plt.subplots_adjust(left=0.2, right=0.95, top=0.95, bottom=0.4)
     return plt.gcf()
 
-def create_piechart(name_1='nazwa', id_1='747063'):
+def create_piechart(name_1, id_1):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
     colors = ("orange", "cyan", "brown", "grey", "indigo", "beige", "red", "blue", "green", "pink", "yellow", "purple",
               "turquoise", "violet", "coral", "olivedrab")
