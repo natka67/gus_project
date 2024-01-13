@@ -91,7 +91,7 @@ class Gui:
         root.title('Wykresy')
 
         # Ustawienia rozmiaru i położenia okna
-        height = 900
+        height = 600
         width = 1720
         root.geometry(f"{width}x{height}")
         center_x = int((root.winfo_screenwidth() - width) / 2)

@@ -64,25 +64,32 @@ def create_heatmap(name_1, name_2, id_1, id_2):
     wrap_labels(heatmap, 25)
     return plt.gcf()
 
+
 def create_bargraph(name_1, id_1):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
 
-    plt.bar(df['Location'], df[name_1], color='maroon', width=0.4)
+    plt.figure(figsize=(10, 6))  # Dodano utworzenie figury przed tworzeniem wykresu
+
+    bar_plot = sns.barplot(data=df, x='Location', y=name_1,  ci=None)
 
     plt.title('Wykres kolumnowy')
     plt.xlabel("Województwo")
-    plt.ylabel(name_1, wrap = True)
+    plt.ylabel(name_1)
     plt.xticks(rotation=90)
     plt.subplots_adjust(left=0.2, right=0.95, top=0.95, bottom=0.4)
+
     return plt.gcf()
+
 
 def create_piechart(name_1, id_1):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
-    colors = ("orange", "cyan", "brown", "grey", "indigo", "beige", "red", "blue", "green", "pink", "yellow", "purple",
-              "turquoise", "violet", "coral", "olivedrab")
-    plt.pie(df[name_1], labels=df['Location'], autopct='%1.1f%%', startangle=90, colors = colors)
-    plt.subplots_adjust(left=0.2, right=0.8, top=0.95, bottom=0.1)
-    plt.title('Wykres kołowy')
+    colors = sns.color_palette("pastel")  # Seaborn dostarcza palety kolorów, np. "pastel"
 
+    plt.figure(figsize=(8, 8))  # Określ wielkość wykresu
+
+    # Utwórz wykres kołowy przy użyciu Matplotlib i Seaborn
+    plt.pie(df[name_1], labels=df['Location'], autopct='%1.1f%%', startangle=90, colors=colors)
+
+    plt.title('Wykres kołowy')
 
     return plt.gcf()
