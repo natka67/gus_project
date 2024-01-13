@@ -175,8 +175,15 @@ class Gui:
             """
             Funkcja zapisuje wykres jako plik PDF.
             """
-            file_path = (f'{dropdown1.get()}_{dropdown2.get()}_{dropdown3.get()}.pdf'
-                         .replace(' ', '_'))
+            wykres = dropdown1.get()
+            if wykres in ['Wykres punktowy', 'Heatmap']:
+                file_path = (f'{dropdown1.get()}_{dropdown2.get()}_{dropdown3.get()}.pdf'
+                             .replace(' ', '_'))
+            elif wykres == 'Dendogram':
+                file_path = f'{dropdown1.get()}.pdf'
+            else:
+                file_path = (f'{dropdown1.get()}_{dropdown2.get()}.pdf'
+                             .replace(' ', '_'))
             self.graph.savefig(file_path, format='pdf')
 
         def generate_plot():
@@ -243,7 +250,7 @@ class Gui:
                                                columnspan=1,
                                                pady=10)
         ttk.Button(left_frame,
-                   text="Pobierz Wykres",
+                   text="Pobierz Załadowany Wykres",
                    command=save_as_pdf).grid(row=3,
                                              column=1,
                                              columnspan=1,
