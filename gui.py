@@ -106,10 +106,17 @@ class Gui:
             """
             Funkcja do aktualizacji interfejsu użytkownika w zależności od wybranej wartości w dropdownie.
             """
+
             selected_value = dropdown1.get()
             if selected_value in ["Wykres punktowy", 'Heatmap']:
+                dropdown2.grid()
                 dropdown3.grid()
             else:
+                dropdown2.grid()
+                dropdown3.grid_remove()
+
+            if selected_value in ["Dendogram"]:
+                dropdown2.grid_remove()
                 dropdown3.grid_remove()
 
 
@@ -137,7 +144,7 @@ class Gui:
         # Listy opcji
         ttk.Label(left_frame, text="Typ wykresu:").grid(row=0, column=0, pady=5, sticky=tk.W)
         dropdown1_var = tk.StringVar()
-        dropdown1 = ttk.Combobox(left_frame, values=['Mapa', 'Wykres punktowy', 'Wykres kolumnowy', 'Wykres kołowy', 'Heatmap'], state="readonly",
+        dropdown1 = ttk.Combobox(left_frame, values=sorted(['Dendogram', 'Mapa', 'Wykres punktowy', 'Wykres kolumnowy', 'Wykres kołowy', 'Heatmap']), state="readonly",
                                  textvariable=dropdown1_var, width=40)
         dropdown1_var.set('Mapa')
         dropdown1.grid(row=0, column=1, pady=5, padx=(0, 10))
@@ -179,6 +186,7 @@ class Gui:
             col_1 = dropdown2.get()
             chart_type = dropdown1.get()
             try:
+                """Kod niepotrzebny,ponieważ pola są wypełnione od początku
                 if chart_type == '':
                     self.create_message_window('Uzupełnij typ wykresu')
                 elif col_1 == '':
@@ -190,8 +198,8 @@ class Gui:
                     self.graph = visuals.create_scatter_plot(
                         name_1=col_1, name_2=col_2,
                         id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
-                    )
-                elif chart_type == 'Heatmap':
+                    )"""
+                if chart_type == 'Heatmap':
                     col_2 = dropdown3.get()
                     self.graph = visuals.create_heatmap(
                         name_1=dropdown2.get(), name_2=col_2,
@@ -201,6 +209,8 @@ class Gui:
                     self.graph = visuals.create_map(
                         name_1=col_1, id_1=self.variables_details[col_1]
                     )
+                elif chart_type == 'Dendogram':
+                    self.graph = visuals.create_dendrogram()
                 elif chart_type == 'Wykres kolumnowy':
                    self.graph = visuals.create_bargraph(
                         name_1=col_1, id_1=self.variables_details[col_1]
