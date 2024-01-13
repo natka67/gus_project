@@ -5,13 +5,18 @@ import pandas as pd
 import geopandas as gpd
 import textwrap
 def wrap_labels(ax, width):
+    """Funkcja służąca do zawijania etykiet na wykresie"""
     labels = []
+    # Przetwarzanie etykiet osi X
     for label in ax.get_xticklabels():
-        text = label.get_text()
+        text = label.get_text() # Pobieranie tekstu etykiety
+        # Łamanie tekstu etykiety i dodanie do listy
         labels.append(textwrap.fill(text, width=width, break_long_words=True))
+    # Ustawianie zmodyfikowanych etykiet na osi X z wyzerowanym kątem rotacji
     ax.set_xticklabels(labels, rotation=0)
-    labels.clear()
+    labels.clear() # Czyszczenie listy etykiet
 
+    # Przetwarzanie etykiet osi Y analogiczne do pierwszej częsci funckji
     for label in ax.get_yticklabels():
         text = label.get_text()
         labels.append(textwrap.fill(text, width=width, break_long_words=False))
@@ -19,9 +24,11 @@ def wrap_labels(ax, width):
 
 
 def create_scatter_plot(name_1, name_2, id_1, id_2):
+    """Funkcja zwracająca wykres punktowy zmiennych przekazanych jako parametr"""
     df = etl.get_dataset(variables_dict={id_1: name_1, id_2:name_2})[['Location', name_1, name_2]]
 
     plt.figure(figsize=(10, 5))
+
     scatter_plot = sns.scatterplot(x=df[name_1], y=df[name_2], hue='Location', data=df, palette='viridis',
                                    legend='full', s=100)
     scatter_plot.legend(loc='upper left', bbox_to_anchor=(1, 1), borderaxespad=0.5)
@@ -35,6 +42,7 @@ def create_scatter_plot(name_1, name_2, id_1, id_2):
     return plt.gcf()
 
 def create_map(name_1, id_1):
+    """Funkcja zwracająca mapę polski z podzałem na województwa z naniesionymi wartościami  zmiennej przekazanej jako parametr"""
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
     df['JPT_NAZWA_'] = df['Location'].astype(str).str.lower()
     df = df[['JPT_NAZWA_', name_1]]
@@ -51,10 +59,11 @@ def create_map(name_1, id_1):
         label = f'\n{name}\n{value}'
         ax.text(x, y, label, fontsize=8, ha='center')
     plt.title(f'{name_1}'.capitalize(), wrap=True)
-
+    # Zwrócenie obiektu wykresu
     return plt.gcf()
 
 def create_heatmap(name_1, name_2, id_1, id_2):
+    """Stworzenie wykresu korelacjii zmiennych wybranych jako parametr"""
     df = etl.get_dataset(variables_dict={id_1: name_1, id_2:name_2})[[name_1, name_2]].corr()
     plt.figure(figsize=(10, 5))
     heatmap = sns.heatmap(df, vmin=-1, vmax=1, linewidths=.5, annot=True,cmap="YlGnBu")
@@ -62,6 +71,7 @@ def create_heatmap(name_1, name_2, id_1, id_2):
     plt.subplots_adjust(left=0.3, right=0.9, top=0.9, bottom=0.3)
     heatmap.set(xlabel="", ylabel="", title='Heatmap')
     wrap_labels(heatmap, 25)
+    # Zwrócenie obiektu wykresu
     return plt.gcf()
 
 
