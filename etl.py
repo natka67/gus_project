@@ -1,10 +1,12 @@
 import pandas as pd
 import requests
 
+# Credentials do zapytań API, aby zwiększyć limit zezwalanych zapytań
 headers1 = {'X-ClientId': '6e0a1952-d481-4c53-7040-08dc0ec6f24d'}
 headers2 = {'X-ClientId': '40e719ee-4329-472f-3e50-08dbfd522f69'}
 page_size = 100
 
+# Słownik z informacjami do zapytań API w celu zdobycia szczegółowych informacji o zmiennych
 variables_dictionary = {
     'K12': {'G603': ['P3820']},
 
@@ -38,9 +40,9 @@ class CustomAPIError(Exception):
 
 
 def get_locations():
-    ''' Function for one-time data load to get areas ids
-        Saves the result to an Excel file named areas.xlsx '''
-    # Get the total number of areas
+    ''' Funkcja do jednorazowego pobrania danych o obszarach
+        Wyniki zapisuje w pliku Excel o nazwie areas.xlsx '''
+    # Pobranie całkowitej liczby obszarów
     response = requests.get('https://bdl.stat.gov.pl/api/v1/units?format=json&page=0&page-size=30', headers=headers1)
 
     if response.status_code != 200:
@@ -49,13 +51,12 @@ def get_locations():
     areas = []
     page_amount = int(total_records / page_size) + 1
 
-    # Get data from all pages
+    # Pobieranie danych ze wszystkich stron
     for page_number in range(page_amount):
         url = f'https://bdl.stat.gov.pl/api/v1/units?format=json&page={page_number}&page-size={page_size}'
         response = requests.get(url, headers=headers1)
         if response.status_code != 200:
             raise CustomAPIError(response.status_code)
-        # print(response)
         areas.extend(response.json()['results'])
     areas_df = pd.DataFrame(areas)
     voivodeships_poland_names = [
@@ -76,22 +77,23 @@ def get_locations():
         "WIELKOPOLSKIE",
         "ZACHODNIOPOMORSKIE"
     ]
+    # Zapisanie pliku z kodami województw oraz pliku z kodami wszystkich dostępnych jednostek terytorialnych
     areas_df[areas_df['name'].isin(voivodeships_poland_names)].to_excel('voivodeships_poland.xlsx')
     areas_df.to_excel('areas.xlsx')
 
 def get_available_data():
-    """Function for one time data load , needed for defining variables_id dictionary"""
+    """Funkcja jednorazowego użytko w celu uzyskania pliku Excel z kolumną kodów zmiennych oraz ich nazw"""
 
     url_areas = 'https://bdl.stat.gov.pl/api/v1/subjects?lang=pl&format=json&page=0&page-size=33'
     url_subarea_base = 'https://bdl.stat.gov.pl/api/v1/subjects?parent-id='  # add parrent id for success
     url_childeren_base = 'https://bdl.stat.gov.pl/api/v1/subjects?parent-id='
     #print(requests.get(url_areas, headers=headers1))
-
+    # Pobieranie danych o głównych obszarach tematycznych i zapisywanie ich do pliku Excel
     main_areas = pd.DataFrame(
         requests.get(url_areas, headers=headers1).json()['results'])  # pd.DataFrame(requests.get(url_areas)['results'])
     main_areas.to_excel('main_areas.xlsx')
 
-    # get subareas for choosen areas
+    # Pobieranie danych o podtematach dla wybranych obszarów
     subareas = []
     for id_key in variables_dictionary.keys():
         url_subarea = url_subarea_base + id_key
@@ -100,6 +102,7 @@ def get_available_data():
     subareas = pd.DataFrame(subareas)
     subareas.to_excel('subareas.xlsx')
 
+    # Pobieranie danych o dzieciach podtematów
     children_id = [k for i in variables_dictionary.values() for k in list(i.keys())]
     children = []
     for child_id in children_id:
@@ -109,6 +112,7 @@ def get_available_data():
     children = pd.DataFrame(children)
     children.to_excel('children.xlsx')
 
+    # Pobieranie i przetwarzanie danych o zmiennych
     ids = [j for i in variables_dictionary.values() for k in i.values() for j in k]
     empty_df = pd.DataFrame()
     empty_df.to_excel('variables.xlsx', index=False)
@@ -150,14 +154,20 @@ except FileNotFoundError:
 
 
 def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_details, year='2020'):
-
+    """Funkcja wykorzystywana do zebrania danych od GUS z wykorzystaniem API. Rezultatem jest zwracany DataFrame result_df"""
     variable_values = []
+    # Iteracja przez każde województwo
     for voivodeship in voivodeships_poland:
+        # Budowa URL do pobierania danych
         url_data_base = f'https://bdl.stat.gov.pl/api/v1/data/by-unit/{voivodeship}?format=json&year={year}'
         variables_amount = 0
+
+        # Dodawanie identyfikatorów zmiennych do URL
         for var_id in variables_dict.keys():
             url_data_base = url_data_base + f'&var-id={var_id}'
             variables_amount = variables_amount+1
+
+        # Ustawienie liczby zmiennych na stronie wyników
         url_data_base = url_data_base + f'&page-size={variables_amount}'
 
         response = requests.get(url_data_base, headers=headers2)
@@ -169,11 +179,14 @@ def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_detai
 
         row_data = {'Location': None, 'Year': None}
 
+        # Przypisywanie wartości do zbioru danych
         for item in data:
             if row_data['Location'] is None:
                 row_data['Location'] = response.json()['unitName']
                 row_data['Year'] = item['values'][0]['year']
+            # Aktualizacja wiersza o wartości zmiennych
             row_data.update({variables_dict[str(item['id'])]: item['values'][0]['val']})
+        # Dodawanie wiersza do listy z danymi o województwie
         variable_values.append(row_data)
 
     result_df = pd.DataFrame(variable_values)

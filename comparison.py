@@ -5,6 +5,9 @@ import pandas as pd
 
 
 def compare():
+    """Funkcja tworząca okno pozwalające na stworzenie porównania województw"""
+
+    # Ustawienie okna głównego
     root = Tk()
     root.title('Porównanie województw')
     width = 450
@@ -14,38 +17,46 @@ def compare():
     center_y = int((root.winfo_screenheight() - height) / 2)
     root.geometry(f"+{center_x}+{center_y}")
 
+    # Wczytanie danych o województwach
     voivodeships_poland = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values)
 
+    # Ustawienie zmiennych dla rozwijanych list
     voivodeship1 = StringVar()
     voivodeship2 = StringVar()
     voivodeship1.set("WIELKOPOLSKIE")
     voivodeship2.set("POMORSKIE")
 
+    # Tworzenie pól z listami rozwijanymi
     drop1 = OptionMenu(root, voivodeship1, *voivodeships_poland.values())
     drop2 = OptionMenu(root, voivodeship2, *voivodeships_poland.values())
     drop1.pack()
     drop2.pack()
 
     def download():
+        """Funkcja pobierająca porównanie"""
         selected1 = voivodeship1.get()
         selected2 = voivodeship2.get()
         voivodeships = [key for key, value in voivodeships_poland.items() if value in [selected1, selected2]]
         download_comparison(voivodeships)
 
     def return_to_menu():
+        """Funkcja przenosząca użytkownika do okna startowego"""
         root.destroy()
         gui.Gui().start_program()
 
+    #Dodanie przycisków pobierającego porównanie i przenoszącego użytkownika do okna startowego
     button = Button(root, text="Pobierz Porównanie", command=download)
     button.pack()
-
     back = Button(root, text="Powrót", command=return_to_menu)
     back.pack()
+
     root.mainloop()
 
 
 def download_comparison(voivodeships):
+    """Funkcja do stworzenia i zapisania porównania województw"""
     try:
+        #Pobranie danych
         df = etl.get_dataset(voivodeships_poland=voivodeships).T
         df.columns = df.iloc[0]
         df = df.iloc[3:]
@@ -53,22 +64,21 @@ def download_comparison(voivodeships):
         df.iloc[:, 1] = pd.to_numeric(df.iloc[:, 1], errors='coerce')
         df['Comparison'] = df.iloc[:, 0] - df.iloc[:, 1]
 
+        # Zapis danych do pliku Excel z zaaplikowanym formatowaniem warunkowym
         with pd.ExcelWriter(f"porównanie_{'_'.join(df.columns)}.xlsx", engine='xlsxwriter') as writer:
             df.to_excel(writer, sheet_name='Sheet1', index=True, header=True)
 
-            # Get the xlsxwriter workbook and worksheet objects.
             workbook = writer.book
             worksheet = writer.sheets['Sheet1']
 
-            # Get the number of rows and columns in the dataframe.
             num_rows, num_cols = df.shape
 
-            # Create a Pandas Excel writer using XlsxWriter as the engine.
+            # Zdefiniowanie warunków dla wybranych kolorów
             red_format = workbook.add_format({'font_color': 'red'})
             green_format = workbook.add_format({'font_color': 'green'})
             black_format = workbook.add_format({'font_color': 'black'})
 
-            # Apply the conditional formatting based on the specified condition.
+            # Zaaplikowanie zasad w pliku Excela
             for row in range(1, num_rows + 1):
                 worksheet.conditional_format(row, num_cols, row, num_cols,
                                              {'type': 'cell',
@@ -90,4 +100,5 @@ def download_comparison(voivodeships):
 
         #df.to_excel(f'porównanie_{'_'.join(df.columns)}.xlsx')
     except Exception as err:
+        # Wyświetlanie okna z komunikatem o błędzie
         gui.Gui().create_message_window(message=f"{str(type(err)).capitalize()}: {err}")
