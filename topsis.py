@@ -17,7 +17,7 @@ def create_ranking():
     root.geometry(f"+{center_x}+{center_y}")
 
 
-    options = ['stymulanta', 'destymulanta']
+    options = ['stymulanta', 'destymulanta', 'brak wpływu']
 
     choosingVariables = [StringVar() for _ in range(16)]
 
@@ -29,7 +29,6 @@ def create_ranking():
     for var in choosingVariables:
         option_menu = OptionMenu(root, var, *options)
         listOfOptionMenu.append(option_menu)
-
 
     labels = []
     for i in list(data.columns):
@@ -44,10 +43,19 @@ def create_ranking():
     impact = ['+' for i in range(16)]
 
     def download():
-
+        variables_to_drop = []
         for i in range(len(choosingVariables)):
-            if(choosingVariables[i].get() == 'destymulanta'):
+            if choosingVariables[i].get() == 'destymulanta':
                 impact[i] = '-'
+            elif choosingVariables[i].get() == 'brak wpływu':
+                variables_to_drop.append(i)
+
+        # Adjust the impact list and drop variables
+        for i in reversed(variables_to_drop):
+            impact.pop(i)
+
+        # Drop variables from the DataFrame
+        data.drop(data.columns[variables_to_drop], axis=1, inplace=True)
         topsis_method(impact, data)
         gui.Gui().create_message_window()
 
@@ -66,7 +74,7 @@ def topsis_method(impact, data):
 
     listOfVariables = list(data.columns)
 
-    data.iloc[:, 0:15] = data.iloc[:, 0:15].astype(float)
+    data.iloc[:, 0:len(listOfVariables)] = data.iloc[:, 0:len(listOfVariables)].astype(float)
     for i in range(len(listOfVariables)):
         squartedSumOfxij = 0
         for j in range(len(data)):
