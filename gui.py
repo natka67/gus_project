@@ -212,6 +212,14 @@ class Gui:
                         name_1=dropdown2.get(), name_2=col_2,
                         id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
                     )
+                elif chart_type == 'Wykres punktowy':
+                    col_2 = dropdown3.get()
+                    if col_2 == '':
+                        self.create_message_window('Uzupełnij nazwę kolumny')
+                    self.graph = visuals.create_scatter_plot(
+                        name_1=col_1, name_2=col_2,
+                        id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
+                    )
                 elif chart_type == 'Mapa':
                     self.graph = visuals.create_map(
                         name_1=col_1, id_1=self.variables_details[col_1]
