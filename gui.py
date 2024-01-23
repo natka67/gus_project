@@ -108,6 +108,7 @@ class Gui:
             """
 
             selected_value = dropdown1.get()
+            label_column_name.grid(row=1, column=0, pady=5, sticky=tk.W)
             if selected_value in ["Wykres punktowy", 'Heatmap']:
                 dropdown2.grid()
                 dropdown3.grid()
@@ -118,6 +119,7 @@ class Gui:
             if selected_value in ["Dendogram"]:
                 dropdown2.grid_remove()
                 dropdown3.grid_remove()
+                label_column_name.grid_remove()
 
 
             if selected_value == "Wykres kołowy":
@@ -150,7 +152,8 @@ class Gui:
         dropdown1.grid(row=0, column=1, pady=5, padx=(0, 10))
         dropdown1_var.trace_add("write", update_ui)
 
-        ttk.Label(left_frame, text="Nazwa kolumn(y):").grid(row=1, column=0, pady=5, sticky=tk.W)
+        label_column_name = ttk.Label(left_frame, text="Nazwa kolumn(y):")
+        label_column_name.grid(row=1, column=0, pady=5, sticky=tk.W)
 
         dropdown2 = ttk.Combobox(left_frame, values=col_names, state="readonly", width=40)
         dropdown2.set(col_names[0])
