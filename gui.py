@@ -196,19 +196,6 @@ class Gui:
             col_1 = dropdown2.get()
             chart_type = dropdown1.get()
             try:
-                """Kod niepotrzebny,ponieważ pola są wypełnione od początku
-                if chart_type == '':
-                    self.create_message_window('Uzupełnij typ wykresu')
-                elif col_1 == '':
-                    self.create_message_window('Uzupełnij nazwę kolumny')
-                elif chart_type == 'Wykres punktowy':
-                    col_2 = dropdown3.get()
-                    if col_2 == '':
-                        self.create_message_window('Uzupełnij nazwę kolumny')
-                    self.graph = visuals.create_scatter_plot(
-                        name_1=col_1, name_2=col_2,
-                        id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
-                    )"""
                 if chart_type == 'Heatmap':
                     col_2 = dropdown3.get()
                     self.graph = visuals.create_heatmap(
