@@ -98,7 +98,7 @@ class Gui:
         center_y = int((root.winfo_screenheight() - height) / 2)
         root.geometry(f"+{center_x}+{center_y}")
 
-        # Odczyt nazw kolumn dostępnych do użycia z pliku Excel
+        # Odczyt nazw zmiennych dostępnych do wuzualizacji z pliku Excel
         col_names = list(self.variables_details.keys())
 
 
@@ -127,17 +127,6 @@ class Gui:
                                   col_names[8], col_names[10], col_names[15]]
             else:
                 dropdown2['values'] = col_names
-            #tworzenie pola w tej funcji psuło nam wizualizacje
-            """if selected_value == "Wykres kołowy":
-                dropdown2 = ttk.Combobox(left_frame, values=col_names_for_piechart, state="readonly", width=40)
-                dropdown2.set(col_names_for_piechart[0])
-                dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))
-            else:
-                dropdown2 = ttk.Combobox(left_frame, values=col_names, state="readonly", width=40)
-                dropdown2.set(col_names[0])
-                dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))"""
-
-
 
         # Ramka po lewej stronie przeznaczona na liste opcji i przyciski
         left_frame = ttk.Frame(root, padding=10)
