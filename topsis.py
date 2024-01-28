@@ -5,8 +5,10 @@ import pandas as pd
 import xlsxwriter
 import numpy as np
 
+#data = etl.get_dataset()
 data = pd.read_excel("gus.xlsx", usecols="B,D:S", index_col=0)
 def create_ranking():
+    #Tworzenie okna do metody TOPSIS
     root = Tk()
     root.title('Ranking województw - metoda TOPSIS')
     width = 1100
@@ -16,25 +18,29 @@ def create_ranking():
     center_y = int((root.winfo_screenheight() - height) / 2)
     root.geometry(f"+{center_x}+{center_y}")
 
-
+    #Lista z 3 rodzajami wpływu zmiennej na ranking
     options = ['stymulanta', 'destymulanta', 'brak wpływu']
 
+    #Tworzenie listy z wpływem zmiennych na ranking
     choosingVariables = [StringVar() for _ in range(16)]
 
-
+    #Określenie każdej zmiennej domyślnie jako stymulanta
     for i in choosingVariables:
         i.set(options[0])
 
+    #Listy rozwijane
     listOfOptionMenu = []
     for var in choosingVariables:
         option_menu = OptionMenu(root, var, *options)
         listOfOptionMenu.append(option_menu)
 
+    #Etykiety zmiennych
     labels = []
     for i in list(data.columns):
         l = Label(root, text=i)
         labels.append(l)
 
+    #Wyświetlnie list rozwijanych z etykietami
     for index, (lab, mymenu) in enumerate(zip(labels, listOfOptionMenu)):
         lab.grid(row=index, column=0)
         mymenu.grid(row=index, column=1)
@@ -43,6 +49,7 @@ def create_ranking():
     impact = ['+' for i in range(16)]
 
     def download():
+        #Lista zmiennych, które nie powinny mieć wpływu na ranking
         variables_to_drop = []
         for i in range(len(choosingVariables)):
             if choosingVariables[i].get() == 'destymulanta':
@@ -50,13 +57,16 @@ def create_ranking():
             elif choosingVariables[i].get() == 'brak wpływu':
                 variables_to_drop.append(i)
 
-        # Adjust the impact list and drop variables
+        #Usunięcie wpływu zmiennych, które nie powinny mieć wpływu na ranking
         for i in reversed(variables_to_drop):
             impact.pop(i)
 
-        # Drop variables from the DataFrame
+        #Usunięcie zmiennych, które nie powinny mieć wpływu na ranking
         data.drop(data.columns[variables_to_drop], axis=1, inplace=True)
+
+        #Wywołanie funkcji zwracającej ranking TOPSIS
         topsis_method(impact, data)
+        #Wyświetlnie okna informującego o sukcesie
         gui.Gui().create_message_window()
 
     def return_to_menu():
@@ -71,7 +81,7 @@ def create_ranking():
     root.mainloop()
 
 def topsis_method(impact, data):
-
+    #Funkcja zwracjąca ranking, której argumentami jest zbiór danych i lista określająca wpływ każdej zmiennej
     listOfVariables = list(data.columns)
 
     data.iloc[:, 0:len(listOfVariables)] = data.iloc[:, 0:len(listOfVariables)].astype(float)
