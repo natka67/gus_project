@@ -142,6 +142,7 @@ def get_available_data():
     merged.to_excel('details_variables.xlsx')
 
 try:
+    """Jeżeli pliki potrzebne do pobrania danych nie zostaną znalezione wywołujemy powyżej zdefiniowane funkcje i ponownie próbujemy."""
     voivodeships = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['name', 'id']].values).values()
     variables_details = dict(zip(pd.read_excel('details_variables.xlsx', dtype={'id_x': str})['id_x'],
                                  pd.read_excel('details_variables.xlsx')['name']))
@@ -169,7 +170,6 @@ def get_dataset(voivodeships_poland=voivodeships, variables_dict=variables_detai
 
         # Ustawienie liczby zmiennych na stronie wyników
         url_data_base = url_data_base + f'&page-size={variables_amount}'
-
         response = requests.get(url_data_base, headers=headers2)
 
         if response.status_code != 200 or response.json()['totalRecords'] == 0:

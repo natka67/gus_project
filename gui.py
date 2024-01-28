@@ -98,7 +98,7 @@ class Gui:
         center_y = int((root.winfo_screenheight() - height) / 2)
         root.geometry(f"+{center_x}+{center_y}")
 
-        # Odczyt nazw kolumn dostępnych do użycia z pliku Excel
+        # Odczyt nazw zmiennych dostępnych do wuzualizacji z pliku Excel
         col_names = list(self.variables_details.keys())
 
 
@@ -108,6 +108,7 @@ class Gui:
             """
 
             selected_value = dropdown1.get()
+            label_column_name.grid(row=1, column=0, pady=5, sticky=tk.W)
             if selected_value in ["Wykres punktowy", 'Heatmap']:
                 dropdown2.grid()
                 dropdown3.grid()
@@ -118,6 +119,7 @@ class Gui:
             if selected_value in ["Dendogram"]:
                 dropdown2.grid_remove()
                 dropdown3.grid_remove()
+                label_column_name.grid_remove()
 
 
             if selected_value == "Wykres kołowy":
@@ -125,17 +127,6 @@ class Gui:
                                   col_names[8], col_names[10], col_names[15]]
             else:
                 dropdown2['values'] = col_names
-            #tworzenie pola w tej funcji psuło nam wizualizacje
-            """if selected_value == "Wykres kołowy":
-                dropdown2 = ttk.Combobox(left_frame, values=col_names_for_piechart, state="readonly", width=40)
-                dropdown2.set(col_names_for_piechart[0])
-                dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))
-            else:
-                dropdown2 = ttk.Combobox(left_frame, values=col_names, state="readonly", width=40)
-                dropdown2.set(col_names[0])
-                dropdown2.grid(row=1, column=1, pady=5, padx=(0, 10))"""
-
-
 
         # Ramka po lewej stronie przeznaczona na liste opcji i przyciski
         left_frame = ttk.Frame(root, padding=10)
@@ -150,7 +141,8 @@ class Gui:
         dropdown1.grid(row=0, column=1, pady=5, padx=(0, 10))
         dropdown1_var.trace_add("write", update_ui)
 
-        ttk.Label(left_frame, text="Nazwa kolumn(y):").grid(row=1, column=0, pady=5, sticky=tk.W)
+        label_column_name = ttk.Label(left_frame, text="Nazwa kolumn(y):")
+        label_column_name.grid(row=1, column=0, pady=5, sticky=tk.W)
 
         dropdown2 = ttk.Combobox(left_frame, values=col_names, state="readonly", width=40)
         dropdown2.set(col_names[0])
@@ -193,23 +185,18 @@ class Gui:
             col_1 = dropdown2.get()
             chart_type = dropdown1.get()
             try:
-                """Kod niepotrzebny,ponieważ pola są wypełnione od początku
-                if chart_type == '':
-                    self.create_message_window('Uzupełnij typ wykresu')
-                elif col_1 == '':
-                    self.create_message_window('Uzupełnij nazwę kolumny')
+                if chart_type == 'Heatmap':
+                    col_2 = dropdown3.get()
+                    self.graph = visuals.create_heatmap(
+                        name_1=dropdown2.get(), name_2=col_2,
+                        id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
+                    )
                 elif chart_type == 'Wykres punktowy':
                     col_2 = dropdown3.get()
                     if col_2 == '':
                         self.create_message_window('Uzupełnij nazwę kolumny')
                     self.graph = visuals.create_scatter_plot(
                         name_1=col_1, name_2=col_2,
-                        id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
-                    )"""
-                if chart_type == 'Heatmap':
-                    col_2 = dropdown3.get()
-                    self.graph = visuals.create_heatmap(
-                        name_1=dropdown2.get(), name_2=col_2,
                         id_1=self.variables_details[col_1], id_2=self.variables_details[col_2]
                     )
                 elif chart_type == 'Mapa':

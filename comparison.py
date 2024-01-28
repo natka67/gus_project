@@ -20,7 +20,7 @@ def compare():
     # Wczytanie danych o województwach
     voivodeships_poland = dict(pd.read_excel('voivodeships_poland.xlsx', dtype={'id': str})[['id', 'name']].values)
 
-    # Ustawienie zmiennych dla rozwijanych list
+    # Ustawienie wartosci początkowych dla rozwijanych list
     voivodeship1 = StringVar()
     voivodeship2 = StringVar()
     voivodeship1.set("WIELKOPOLSKIE")
@@ -73,12 +73,12 @@ def download_comparison(voivodeships):
 
             num_rows, num_cols = df.shape
 
-            # Zdefiniowanie warunków dla wybranych kolorów
+            # Zdefiniowanie kolorów aplikowanych dla wartości dodatnich, ujemnych oraz zera.
             red_format = workbook.add_format({'font_color': 'red'})
             green_format = workbook.add_format({'font_color': 'green'})
             black_format = workbook.add_format({'font_color': 'black'})
 
-            # Zaaplikowanie zasad w pliku Excela
+            # Zaaplikowanie kolorów w pliku Excela na wartościach w ostatniej kolumnie
             for row in range(1, num_rows + 1):
                 worksheet.conditional_format(row, num_cols, row, num_cols,
                                              {'type': 'cell',
@@ -98,7 +98,6 @@ def download_comparison(voivodeships):
                                               'value': 0,
                                               'format': green_format})
 
-        #df.to_excel(f'porównanie_{'_'.join(df.columns)}.xlsx')
     except Exception as err:
-        # Wyświetlanie okna z komunikatem o błędzie
+        """ Wyświetlanie okna z komunikatem o błędzie """
         gui.Gui().create_message_window(message=f"{str(type(err)).capitalize()}: {err}")

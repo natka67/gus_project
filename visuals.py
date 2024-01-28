@@ -42,7 +42,6 @@ def create_scatter_plot(name_1, name_2, id_1, id_2):
     plt.xlabel(name_1.capitalize(), wrap=True)
     plt.ylabel(name_2.capitalize(), wrap=True)
     plt.subplots_adjust(left=0.1, right=0.7, top=0.9, bottom=0.15)
-    # plt.show()
     return plt.gcf()
 
 
