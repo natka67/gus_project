@@ -5,8 +5,9 @@ import pandas as pd
 import xlsxwriter
 import numpy as np
 
-#data = etl.get_dataset()
-data = pd.read_excel("gus.xlsx", usecols="B,D:S", index_col=0)
+data = etl.get_dataset().drop(columns='Year', axis=1)
+data.set_index("Location", inplace=True)
+
 def create_ranking():
     #Tworzenie okna do metody TOPSIS
     root = Tk()

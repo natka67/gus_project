@@ -114,7 +114,7 @@ def create_dendrogram():
 def create_bargraph(name_1, id_1):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
 
-    plt.figure(figsize=(10, 6))  # Dodano utworzenie figury przed tworzeniem wykresu
+    plt.figure(figsize=(10, 6))
 
     bar_plot = sns.barplot(data=df, x='Location', y=name_1,  ci=None)
 
@@ -131,9 +131,9 @@ def create_piechart(name_1, id_1):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
     colors = sns.color_palette("pastel")  # Seaborn dostarcza palety kolorów, np. "pastel"
 
-    plt.figure(figsize=(8, 8))  # Określ wielkość wykresu
+    plt.figure(figsize=(8, 8))  # Wielkość wykresu
 
-    # Utwórz wykres kołowy przy użyciu Matplotlib i Seaborn
+    # Wykres kołowy
     plt.pie(df[name_1], labels=df['Location'], autopct='%1.1f%%', startangle=90, colors=colors)
 
     plt.title('Wykres kołowy')
