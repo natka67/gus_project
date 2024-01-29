@@ -1,12 +1,13 @@
 from tkinter import ttk
 from matplotlib.figure import Figure
 import tkinter as tk
-
+import os
 import topsis
 import visuals
 import pandas as pd
 import etl
 import comparison
+import glob
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 
@@ -165,17 +166,23 @@ class Gui:
 
         def save_as_pdf():
             """
-            Funkcja zapisuje wykres jako plik PDF.
+            Funkcja zapisuje wykres jako plik PDF. Sparwdza czy typ danego wykresu już został zapisany.
+            Jeżeli tak to pobiera największy numer wykresu.
             """
-            wykres = dropdown1.get()
-            if wykres in ['Wykres punktowy', 'Heatmap']:
-                file_path = (f'{dropdown1.get()}_{dropdown2.get()}_{dropdown3.get()}.pdf'
-                             .replace(' ', '_'))
-            elif wykres == 'Dendogram':
-                file_path = f'{dropdown1.get()}.pdf'
-            else:
-                file_path = (f'{dropdown1.get()}_{dropdown2.get()}.pdf'
-                             .replace(' ', '_'))
+            numer = 1
+            wykres = dropdown1.get().replace(' ', '_')
+            pdf_files = glob.glob('*.pdf')
+            numery_plikow = []
+            for pdf in pdf_files:
+                if wykres in pdf:
+                    try:
+                        numery_plikow.append(int(pdf.split('_')[-1].split('.')[0]))
+                    except Exception as err:
+                        self.create_message_window(message=f"{str(type(err)).capitalize()}: {err}.\nProszę zmienić lokalizację pliku, którego nazwa została zmodyfikowana.")
+            if numery_plikow:
+                numer = max(numery_plikow) + 1
+            file_path = (f'{dropdown1.get()}_{numer}.pdf'
+                         .replace(' ', '_'))
             self.graph.savefig(file_path, format='pdf')
 
         def generate_plot():
