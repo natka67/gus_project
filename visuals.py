@@ -32,7 +32,6 @@ def create_scatter_plot(name_1, name_2, id_1, id_2):
     df = etl.get_dataset(variables_dict={id_1: name_1, id_2: name_2})[['Location', name_1, name_2]]
 
     plt.figure(figsize=(10, 5))
-
     scatter_plot = sns.scatterplot(x=df[name_1], y=df[name_2], hue='Location', data=df, palette='viridis',
                                    legend='full', s=100)
     scatter_plot.legend(loc='upper left', bbox_to_anchor=(1, 1), borderaxespad=0.5)
@@ -101,7 +100,7 @@ def create_dendrogram():
 
     # Rysowanie dendrogramu
     plt.figure(figsize=(10, 10))
-    dendrogram(linked, orientation='right', labels=areas, distance_sort='ascending', leaf_rotation=15, truncate_mode = 'lastp')
+    dendrogram(linked, orientation='right', labels=areas, distance_sort='descending', leaf_rotation=15, truncate_mode = 'lastp')
 
     # Zaznaczenie linii poziomej reprezentującej podział na klastry
     plt.subplots_adjust(bottom=0.1, top=0.95, left=0.2, right=0.90)
@@ -109,13 +108,9 @@ def create_dendrogram():
     plt.xlabel('Odległość w klastrze')
     plt.yticks(fontsize=9)
     return plt.gcf()
-
-
 def create_bargraph(name_1, id_1):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
-
     plt.figure(figsize=(10, 6))
-
     bar_plot = sns.barplot(data=df, x='Location', y=name_1,  ci=None)
 
     plt.title('Wykres kolumnowy')
@@ -130,7 +125,6 @@ def create_bargraph(name_1, id_1):
 def create_piechart(name_1, id_1):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
     colors = sns.color_palette("pastel")  # Seaborn dostarcza palety kolorów, np. "pastel"
-
     plt.figure(figsize=(8, 8))  # Wielkość wykresu
 
     # Wykres kołowy
