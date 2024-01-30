@@ -108,6 +108,8 @@ def create_dendrogram():
     plt.xlabel('Odległość w klastrze')
     plt.yticks(fontsize=9)
     return plt.gcf()
+
+
 def create_bargraph(name_1, id_1):
     df = etl.get_dataset(variables_dict={id_1: name_1})[['Location', name_1]]
     plt.figure(figsize=(10, 6))
